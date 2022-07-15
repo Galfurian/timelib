@@ -29,7 +29,7 @@ inline auto compute_mean(std::vector<double> &values)
 
 int main(int argc, char *argv[])
 {
-    stopwatch::StopWatch sw;
+    stopwatch::Stopwatch sw;
     std::vector<double> values;
     const unsigned size = 10000;
     const unsigned runs = 1000;

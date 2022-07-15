@@ -20,7 +20,7 @@ enum PrintMode {
     total    ///< Total elapsed  :
 };
 
-class StopWatch {
+class Stopwatch {
 private:
     std::chrono::high_resolution_clock::time_point _last_time_point;
     std::chrono::duration<double> _total_duration;
@@ -28,7 +28,7 @@ private:
     PrintMode _print_mode;
 
 public:
-    StopWatch(PrintMode print_mode = human)
+    Stopwatch(PrintMode print_mode = human)
         : _last_time_point(std::chrono::high_resolution_clock::now()),
           _total_duration(std::chrono::duration<double>::zero()),
           _partials(),
@@ -89,9 +89,9 @@ public:
         return std::chrono::duration_cast<T>(_total_duration).count();
     }
 
-    StopWatch mean() const
+    Stopwatch mean() const
     {
-        StopWatch sw(*this);
+        Stopwatch sw(*this);
         sw._total_duration /= static_cast<double>(_partials.size());
         sw._partials.clear();
         return sw;
@@ -158,7 +158,7 @@ public:
         return ss.str();
     }
 
-    friend std::ostream &operator<<(std::ostream &lhs, const StopWatch &rhs)
+    friend std::ostream &operator<<(std::ostream &lhs, const Stopwatch &rhs)
     {
         lhs << rhs.to_string();
         return lhs;
@@ -170,7 +170,7 @@ public:
 /// @param function the function to sample.
 /// @return the same stopwatch passed as argument.
 template <class Function>
-inline auto &time(StopWatch &stopwatch, Function &&function)
+inline auto &time(Stopwatch &stopwatch, Function &&function)
 {
     stopwatch.reset();
     stopwatch.start();
@@ -184,7 +184,7 @@ inline auto &time(StopWatch &stopwatch, Function &&function)
 /// @param function the function to sample.
 /// @return the same stopwatch passed as argument.
 template <std::size_t N, class Function>
-inline auto ntimes(StopWatch &stopwatch, Function &&function)
+inline auto ntimes(Stopwatch &stopwatch, Function &&function)
 {
     stopwatch.reset();
     for (std::size_t i = 0u; i < N; ++i) {
