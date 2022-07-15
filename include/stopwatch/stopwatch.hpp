@@ -92,7 +92,7 @@ public:
     StopWatch mean() const
     {
         StopWatch sw(*this);
-        sw._total_duration /= _partials.size();
+        sw._total_duration /= static_cast<double>(_partials.size());
         sw._partials.clear();
         return sw;
     }
@@ -153,7 +153,7 @@ public:
             ss << ns.count();
             duration -= ns;
         } else {
-            ss << (std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count() * 1e-09);
+            ss << (static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count()) * 1e-09);
         }
         return ss.str();
     }
@@ -183,7 +183,7 @@ inline auto &time(StopWatch &stopwatch, Function &&function)
 /// @param stopwatch the stopwatch used to retrieve the elapse time.
 /// @param function the function to sample.
 /// @return the same stopwatch passed as argument.
-template <unsigned N, class Function>
+template <std::size_t N, class Function>
 inline auto ntimes(StopWatch &stopwatch, Function &&function)
 {
     stopwatch.reset();

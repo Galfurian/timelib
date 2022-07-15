@@ -8,23 +8,23 @@ inline auto generate_random_values(unsigned size)
     std::vector<double> values(size);
     std::uniform_real_distribution<double> dist(-100, +100);
     std::default_random_engine eng;
-    for (unsigned int i = 0; i < values.size(); ++i)
+    for (std::size_t i = 0; i < values.size(); ++i)
         values[i] = dist(eng);
     return values;
 }
 
 inline auto compute_abs(std::vector<double> &values)
 {
-    for (unsigned int i = 0; i < values.size(); ++i)
+    for (std::size_t i = 0; i < values.size(); ++i)
         values[i] = std::abs(values[i]);
 }
 
 inline auto compute_mean(std::vector<double> &values)
 {
     double mean = 0.;
-    for (unsigned int i = 0; i < values.size(); ++i)
+    for (std::size_t i = 0; i < values.size(); ++i)
         mean += values[i];
-    return mean / values.size();
+    return mean / static_cast<double>(values.size());
 }
 
 int main(int argc, char *argv[])
