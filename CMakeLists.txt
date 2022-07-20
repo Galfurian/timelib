@@ -59,9 +59,6 @@ target_include_directories(stopwatch INTERFACE ${PROJECT_SOURCE_DIR}/include)
 # Set compilation flags.
 target_compile_options(stopwatch INTERFACE ${STOPWATCH_COMPILE_OPTIONS})
 
-# Set compilation definitions.
-target_compile_definitions(stopwatch INTERFACE ${STOPWATCH_COMPILE_DEFINITIONS})
-
 # -----------------------------------------------------------------------------
 # EXAMPLES
 # -----------------------------------------------------------------------------
@@ -77,7 +74,4 @@ if(STOPWATCH_BUILD_EXAMPLES)
 
     # Set compilation flags.
     target_compile_options(example_stopwatch PUBLIC ${STOPWATCH_COMPILE_OPTIONS})
-
-    # Set compilation definitions.
-    target_compile_definitions(example_stopwatch INTERFACE ${STOPWATCH_COMPILE_DEFINITIONS})
 endif(STOPWATCH_BUILD_EXAMPLES)
