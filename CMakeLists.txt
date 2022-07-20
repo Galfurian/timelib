@@ -8,9 +8,6 @@ cmake_minimum_required(VERSION 3.1...3.18)
 # Set the project name.
 project(stopwatch CXX)
 
-# Set C++ Standard.
-set(CMAKE_CXX_STANDARD 17)
-
 # -----------------------------------------------------------------------------
 # Add options.
 # -----------------------------------------------------------------------------
@@ -75,7 +72,7 @@ if(STOPWATCH_BUILD_EXAMPLES)
     # Inlcude header directories.
     target_include_directories(example_stopwatch PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
-    # Link libraries
+    # Link libraries.
     target_link_libraries(example_stopwatch PUBLIC stopwatch)
 
     # Set compilation flags.
