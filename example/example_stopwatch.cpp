@@ -27,7 +27,7 @@ inline auto compute_mean(std::vector<double> &values)
     return mean / static_cast<double>(values.size());
 }
 
-int main(int argc, char *argv[])
+int main(int, char *[])
 {
     stopwatch::Stopwatch sw;
     std::vector<double> values;
