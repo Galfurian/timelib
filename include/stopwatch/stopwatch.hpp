@@ -97,6 +97,11 @@ public:
         return sw;
     }
 
+    inline auto partials() const
+    {
+        return _partials;
+    }
+
     virtual std::string to_string() const
     {
         std::stringstream ss;
