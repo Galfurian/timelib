@@ -11,7 +11,7 @@
 #include <sstream>
 
 #if __cplusplus < 201103L
-#include <time.h>
+#include "timespec_support.hpp"
 #else
 #include <chrono>
 #endif
@@ -26,167 +26,10 @@ enum PrintMode {
     total    ///< Total elapsed  :
 };
 
-#if __cplusplus < 201103L
-
-namespace detail
-{
-
-static const unsigned long ns_per_sec = 1000000000UL;
-
-inline timespec normalize(timespec ts)
-{
-    while (ts.tv_nsec >= static_cast<long>(ns_per_sec)) {
-        ++(ts.tv_sec);
-        ts.tv_nsec -= ns_per_sec;
-    }
-    while (ts.tv_nsec <= -static_cast<long>(ns_per_sec)) {
-        --(ts.tv_sec);
-        ts.tv_nsec += ns_per_sec;
-    }
-    if (ts.tv_nsec < 0) {
-        --(ts.tv_sec);
-        ts.tv_nsec = (ns_per_sec + ts.tv_nsec);
-    }
-    return ts;
-}
-
-template <typename T>
-inline timespec ns_to_nanoseconds(const T &ns)
-{
-    timespec ts;
-    ts.tv_sec  = static_cast<time_t>(ns) / detail::ns_per_sec;
-    ts.tv_nsec = static_cast<long>(ns) % detail::ns_per_sec;
-    return detail::normalize(ts);
-}
-
-template <typename T>
-inline T ts_to_nanoseconds(const timespec &ts)
-{
-    return static_cast<T>((ts.tv_sec * detail::ns_per_sec) + ts.tv_nsec);
-}
-template <typename T>
-inline T ts_to_microseconds(const timespec &ts)
-{
-    unsigned long ns = ts_to_nanoseconds<unsigned long>(ts);
-    return static_cast<T>(ns / 1000UL);
-}
-template <typename T>
-inline T ts_to_milliseconds(const timespec &ts)
-{
-    unsigned long ns = ts_to_nanoseconds<unsigned long>(ts);
-    return static_cast<T>(ns / 1000000UL);
-}
-template <typename T>
-inline T ts_to_seconds(const timespec &ts)
-{
-    unsigned long ns = ts_to_nanoseconds<unsigned long>(ts);
-    return static_cast<T>(ns / detail::ns_per_sec);
-}
-template <typename T>
-inline T ts_to_minutes(const timespec &ts)
-{
-    unsigned long ns = ts_to_nanoseconds<unsigned long>(ts);
-    return static_cast<T>((ns / detail::ns_per_sec) / 60);
-}
-template <typename T>
-inline T ts_to_hours(const timespec &ts)
-{
-    unsigned long ns = ts_to_nanoseconds<unsigned long>(ts);
-    return static_cast<T>((ns / detail::ns_per_sec) / 3600);
-}
-
-inline void clock_gettime(timespec &ts)
-{
-    clock_gettime(CLOCK_REALTIME, &ts);
-}
-
-inline timespec clock_now()
-{
-    timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    return ts;
-}
-
-} // namespace detail
-
-inline timespec operator+(const timespec &lhs, const timespec &rhs)
-{
-    return detail::ns_to_nanoseconds(
-        detail::ts_to_nanoseconds<unsigned long>(lhs) +
-        detail::ts_to_nanoseconds<unsigned long>(rhs));
-}
-
-template <typename T>
-inline timespec operator+(const timespec &lhs, const T &rhs)
-{
-    return detail::ns_to_nanoseconds(detail::ts_to_nanoseconds<T>(lhs) + rhs);
-}
-
-inline timespec operator-(const timespec &lhs, const timespec &rhs)
-{
-    return detail::ns_to_nanoseconds(
-        detail::ts_to_nanoseconds<unsigned long>(lhs) -
-        detail::ts_to_nanoseconds<unsigned long>(rhs));
-}
-
-template <typename T>
-inline timespec operator-(const timespec &lhs, const T &rhs)
-{
-    return detail::ns_to_nanoseconds(detail::ts_to_nanoseconds<T>(lhs) - rhs);
-}
-
-inline timespec operator/(const timespec &lhs, const timespec &rhs)
-{
-    return detail::ns_to_nanoseconds(
-        detail::ts_to_nanoseconds<unsigned long>(lhs) /
-        detail::ts_to_nanoseconds<unsigned long>(rhs));
-}
-
-template <typename T>
-inline timespec operator/(const timespec &lhs, const T &rhs)
-{
-    return detail::ns_to_nanoseconds(detail::ts_to_nanoseconds<T>(lhs) / rhs);
-}
-
-inline timespec &operator+=(timespec &lhs, const timespec &rhs)
-{
-    return (lhs = lhs + rhs);
-}
-
-template <typename T>
-inline timespec &operator+=(timespec &lhs, const T &rhs)
-{
-    return (lhs = lhs + rhs);
-}
-
-inline timespec &operator-=(timespec &lhs, const timespec &rhs)
-{
-    return (lhs = lhs - rhs);
-}
-
-template <typename T>
-inline timespec &operator-=(timespec &lhs, const T &rhs)
-{
-    return (lhs = lhs - rhs);
-}
-
-inline timespec &operator/=(timespec &lhs, const timespec &rhs)
-{
-    return (lhs = lhs / rhs);
-}
-
-template <typename T>
-inline timespec &operator/=(timespec &lhs, const T &rhs)
-{
-    return (lhs = lhs / rhs);
-}
-
-#endif
-
 class Duration {
 public:
 #if __cplusplus < 201103L
-    typedef timespec duration_type_t;
+    typedef timespec_t duration_type_t;
 #else
     typedef std::chrono::duration<double> duration_type_t;
 #endif
@@ -200,14 +43,7 @@ public:
 
     static inline duration_type_t zero()
     {
-#if __cplusplus < 201103L
-        duration_type_t duration;
-        duration.tv_sec  = 0;
-        duration.tv_nsec = 0;
-        return duration;
-#else
         return duration_type_t::zero();
-#endif
     }
 
     inline void set_print_mode(PrintMode print_mode)
@@ -271,33 +107,28 @@ public:
         duration_type_t duration = _duration;
         if (_print_mode == human) {
 #if __cplusplus < 201103L
-            unsigned h = detail::ts_to_hours<unsigned>(duration);
-            if (h) {
+            unsigned h, m, s, ms, us, ns;
+            if ((h = duration.to_hours<unsigned>())) {
                 ss << std::setw(3) << h << "H ";
-                duration -= (h * 3600) * detail::ns_per_sec;
+                duration -= detail::hours_to_ns(h);
             }
-            unsigned m = detail::ts_to_minutes<unsigned>(duration);
-            if (m) {
+            if ((m = duration.to_minutes<unsigned>())) {
                 ss << std::setw(3) << m << "M ";
-                duration -= (m * 60) * detail::ns_per_sec;
+                duration -= detail::minutes_to_ns(m);
             }
-            unsigned s = detail::ts_to_seconds<unsigned>(duration);
-            if (s) {
+            if ((s = duration.to_seconds<unsigned>())) {
                 ss << std::setw(3) << s << "s ";
-                duration -= s * detail::ns_per_sec;
+                duration -= detail::seconds_to_ns(s);
             }
-            unsigned ms = detail::ts_to_milliseconds<unsigned>(duration);
-            if (ms) {
+            if ((ms = duration.to_milliseconds<unsigned>())) {
                 ss << std::setw(3) << ms << "m ";
-                duration -= ms * 1000000UL;
+                duration -= detail::milliseconds_to_ns(ms);
             }
-            unsigned us = detail::ts_to_microseconds<unsigned>(duration);
-            if (us) {
+            if ((us = duration.to_microseconds<unsigned>())) {
                 ss << std::setw(3) << us << "u ";
-                duration -= us * 1000UL;
+                duration -= detail::microseconds_to_ns(us);
             }
-            unsigned ns = detail::ts_to_nanoseconds<unsigned>(duration);
-            if (ns) {
+            if ((ns = duration.to_nanoseconds<unsigned>())) {
                 ss << std::setw(3) << ns << "n ";
                 duration -= ns;
             }
@@ -335,23 +166,18 @@ public:
 #endif
         } else if (_print_mode == numeric) {
 #if __cplusplus < 201103L
-            unsigned h = detail::ts_to_hours<unsigned>(duration);
-            ss << h << ".";
-            duration -= (h * 3600) * detail::ns_per_sec;
-            unsigned m = detail::ts_to_minutes<unsigned>(duration);
-            ss << m << ".";
-            duration -= (m * 60) * detail::ns_per_sec;
-            unsigned s = detail::ts_to_seconds<unsigned>(duration);
-            ss << s << ".";
-            duration -= s * detail::ns_per_sec;
-            unsigned ms = detail::ts_to_milliseconds<unsigned>(duration);
-            ss << ms << ".";
-            duration -= ms * 1000000UL;
-            unsigned us = detail::ts_to_microseconds<unsigned>(duration);
-            ss << us << ".";
-            duration -= us * 1000UL;
-            unsigned ns = detail::ts_to_nanoseconds<unsigned>(duration);
-            ss << ns << ".";
+            unsigned h, m, s, ms, us, ns;
+            ss << (h = duration.to_hours<unsigned>()) << ".";
+            duration -= detail::hours_to_ns(h);
+            ss << (m = duration.to_minutes<unsigned>()) << ".";
+            duration -= detail::minutes_to_ns(m);
+            ss << (s = duration.to_seconds<unsigned>()) << ".";
+            duration -= detail::seconds_to_ns(s);
+            ss << (ms = duration.to_milliseconds<unsigned>()) << ".";
+            duration -= detail::milliseconds_to_ns(ms);
+            ss << (us = duration.to_microseconds<unsigned>()) << ".";
+            duration -= detail::microseconds_to_ns(us);
+            ss << (ns = duration.to_nanoseconds<unsigned>()) << ".";
             duration -= ns;
 #else
             auto h = std::chrono::duration_cast<std::chrono::hours>(duration);
@@ -375,7 +201,7 @@ public:
             duration -= ns;
         } else {
 #if __cplusplus < 201103L
-            ss << detail::ts_to_nanoseconds<double>(duration) * 1e-09;
+            ss << duration.to_nanoseconds<double>() * 1e-09;
 #else
             ss << (static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count()) * 1e-09);
 #endif
@@ -397,24 +223,20 @@ private:
 class Stopwatch {
 public:
 #if __cplusplus < 201103L
-    typedef timespec clock_type_t;
-    typedef timespec time_point_type_t;
+    typedef timespec_t clock_type_t;
+    typedef timespec_t time_point_type_t;
 #else
     typedef std::chrono::high_resolution_clock clock_type_t;
     typedef clock_type_t::time_point time_point_type_t;
 #endif
 
     Stopwatch(PrintMode print_mode = human)
-        : _last_time_point(),
+        : _last_time_point(clock_type_t::now()),
           _total_duration(Duration::zero(), print_mode),
           _partials(),
           _print_mode(print_mode)
     {
-#if __cplusplus < 201103L
-        detail::clock_gettime(_last_time_point);
-#else
-        _last_time_point                 = clock_type_t::now();
-#endif
+        // Nothing to do.
     }
 
     inline void set_print_mode(PrintMode print_mode)
@@ -438,7 +260,7 @@ public:
     inline void start()
     {
 #if __cplusplus < 201103L
-        detail::clock_gettime(_last_time_point);
+        _last_time_point = time_point_type_t::now();
 #else
         _last_time_point                 = clock_type_t::now();
 #endif
@@ -447,7 +269,7 @@ public:
     inline void round()
     {
 #if __cplusplus < 201103L
-        time_point_type_t now     = detail::clock_now();
+        time_point_type_t now     = time_point_type_t::now();
         time_point_type_t elapsed = now - _last_time_point;
 #else
         time_point_type_t now            = clock_type_t::now();
@@ -462,7 +284,7 @@ public:
     {
         if (_partials.empty()) {
 #if __cplusplus < 201103L
-            time_point_type_t now = detail::clock_now();
+            time_point_type_t now = time_point_type_t::now();
 #else
             time_point_type_t now = clock_type_t::now();
 #endif
@@ -479,7 +301,7 @@ public:
     Stopwatch mean() const
     {
         Stopwatch sw(*this);
-        sw._total_duration /= static_cast<double>(_partials.size());
+        sw._total_duration /= _partials.size();
         sw._partials.clear();
         return sw;
     }

@@ -18,7 +18,7 @@ option(STOPWATCH_WARNINGS_AS_ERRORS "Treat all warnings as errors for stopwatch"
 # -----------------------------------------------------------------------------
 # Set the compilation flags.
 # -----------------------------------------------------------------------------
-set(STOPWATCH_COMPILE_OPTIONS "${STOPWATCH_COMPILE_OPTIONS} -std=c++17")
+set(STOPWATCH_COMPILE_OPTIONS "${STOPWATCH_COMPILE_OPTIONS} -std=c++98")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Disable warnings that suggest using MSVC-specific safe functions
