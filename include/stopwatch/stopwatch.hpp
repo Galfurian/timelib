@@ -19,24 +19,32 @@
 namespace stopwatch
 {
 
+#if __cplusplus < 201103L
+typedef timespec_t clock_type_t;
+typedef timespec_t time_point_type_t;
+typedef timespec_t duration_type_t;
+typedef timespec_t elapsed_time_t;
+#else
+typedef std::chrono::high_resolution_clock clock_type_t;
+typedef std::chrono::high_resolution_clock::time_point time_point_type_t;
+typedef std::chrono::duration<double> duration_type_t;
+typedef std::chrono::nanoseconds elapsed_time_t;
+#endif
+
 /// @brief The way the stopwatch prints the elapsed time.
 enum PrintMode {
-    human,   ///< Human readable :  1h  4m  2s   1m 153u 399n
-    numeric, ///< Numeric        :  1.4.2.1.153.399
-    total    ///< Total elapsed  :
+    human,   ///< Human readable   :  1h  4m  2s   1m 153u 399n
+    numeric, ///< Numeric          :  1.4.2.1.153.399
+    total,   ///< Total elapsed    :
+    custom   ///< Use placeholders : %H,%M,%s,%m,%u,%n
 };
 
 class Duration {
 public:
-#if __cplusplus < 201103L
-    typedef timespec_t duration_type_t;
-#else
-    typedef std::chrono::duration<double> duration_type_t;
-#endif
-
-    Duration(duration_type_t duration, PrintMode print_mode)
+    Duration(duration_type_t duration, PrintMode print_mode, const std::string &format)
         : _duration(duration),
-          _print_mode(print_mode)
+          _print_mode(print_mode),
+          _format(format)
     {
         // Nothing to do.
     }
@@ -51,46 +59,82 @@ public:
         _print_mode = print_mode;
     }
 
+    inline void set_format(const std::string &format)
+    {
+        _format = format;
+    }
+
     inline Duration operator+(const Duration &rhs) const
     {
-        Duration new_duration = *this;
-        new_duration._duration += rhs._duration;
-        return new_duration;
+        return Duration(_duration + rhs._duration, _print_mode, _format);
     }
 
     template <typename T>
     inline Duration operator+(const T &rhs) const
     {
-        Duration new_duration = *this;
-        new_duration._duration += rhs;
-        return new_duration;
+        return Duration(_duration + rhs, _print_mode, _format);
+    }
+
+    inline Duration operator-(const Duration &rhs) const
+    {
+        return Duration(_duration - rhs._duration, _print_mode, _format);
+    }
+
+    template <typename T>
+    inline Duration operator-(const T &rhs) const
+    {
+        return Duration(_duration - rhs, _print_mode, _format);
+    }
+
+    template <typename T>
+    inline Duration operator/(const Duration &rhs) const
+    {
+        return Duration(_duration + rhs._duration, _print_mode, _format);
     }
 
     template <typename T>
     inline Duration operator/(const T &rhs) const
     {
-        Duration new_duration = *this;
-        new_duration._duration /= rhs;
-        return new_duration;
+        return Duration(_duration + rhs, _print_mode, _format);
     }
 
     inline Duration &operator+=(const Duration &rhs)
     {
-        _duration += rhs._duration;
+        _duration = _duration + rhs._duration;
         return *this;
     }
 
     template <typename T>
     inline Duration &operator+=(const T &rhs)
     {
-        _duration += rhs;
+        _duration = _duration + rhs;
+        return *this;
+    }
+
+    inline Duration &operator-=(const Duration &rhs)
+    {
+        _duration = _duration - rhs._duration;
+        return *this;
+    }
+
+    template <typename T>
+    inline Duration &operator-=(const T &rhs)
+    {
+        _duration = _duration - rhs;
+        return *this;
+    }
+
+    template <typename T>
+    inline Duration &operator/=(const Duration &rhs)
+    {
+        _duration = _duration / rhs._duration;
         return *this;
     }
 
     template <typename T>
     inline Duration &operator/=(const T &rhs)
     {
-        _duration /= rhs;
+        _duration = _duration / rhs;
         return *this;
     }
 
@@ -103,108 +147,61 @@ public:
     inline std::string to_string() const
     {
         std::stringstream ss;
-        // Get the duration.
-        duration_type_t duration = _duration;
-        if (_print_mode == human) {
+        if (_print_mode == total) {
 #if __cplusplus < 201103L
-            unsigned h, m, s, ms, us, ns;
-            if ((h = duration.to_hours<unsigned>())) {
-                ss << std::setw(3) << h << "H ";
-                duration -= detail::hours_to_ns(h);
-            }
-            if ((m = duration.to_minutes<unsigned>())) {
-                ss << std::setw(3) << m << "M ";
-                duration -= detail::minutes_to_ns(m);
-            }
-            if ((s = duration.to_seconds<unsigned>())) {
-                ss << std::setw(3) << s << "s ";
-                duration -= detail::seconds_to_ns(s);
-            }
-            if ((ms = duration.to_milliseconds<unsigned>())) {
-                ss << std::setw(3) << ms << "m ";
-                duration -= detail::milliseconds_to_ns(ms);
-            }
-            if ((us = duration.to_microseconds<unsigned>())) {
-                ss << std::setw(3) << us << "u ";
-                duration -= detail::microseconds_to_ns(us);
-            }
-            if ((ns = duration.to_nanoseconds<unsigned>())) {
-                ss << std::setw(3) << ns << "n ";
-                duration -= ns;
-            }
+            ss << _duration.to_nanoseconds<double>() * 1e-09;
 #else
-            auto h = std::chrono::duration_cast<std::chrono::hours>(duration);
-            if (h.count()) {
-                ss << std::setw(3) << h.count() << "H ";
-                duration -= h;
-            }
-            auto m = std::chrono::duration_cast<std::chrono::minutes>(duration);
-            if (m.count()) {
-                ss << std::setw(3) << m.count() << "M ";
-                duration -= m;
-            }
-            auto s = std::chrono::duration_cast<std::chrono::seconds>(duration);
-            if (s.count()) {
-                ss << std::setw(3) << s.count() << "s ";
-                duration -= s;
-            }
-            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
-            if (ms.count()) {
-                ss << std::setw(3) << ms.count() << "m ";
-                duration -= ms;
-            }
-            auto us = std::chrono::duration_cast<std::chrono::microseconds>(duration);
-            if (us.count()) {
-                ss << std::setw(3) << us.count() << "u ";
-                duration -= us;
-            }
-            auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(duration);
-            if (ns.count()) {
-                ss << std::setw(3) << ns.count() << "n ";
-                duration -= ns;
-            }
+            ss << (static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(_duration).count()) * 1e-09);
 #endif
-        } else if (_print_mode == numeric) {
-#if __cplusplus < 201103L
-            unsigned h, m, s, ms, us, ns;
-            ss << (h = duration.to_hours<unsigned>()) << ".";
-            duration -= detail::hours_to_ns(h);
-            ss << (m = duration.to_minutes<unsigned>()) << ".";
-            duration -= detail::minutes_to_ns(m);
-            ss << (s = duration.to_seconds<unsigned>()) << ".";
-            duration -= detail::seconds_to_ns(s);
-            ss << (ms = duration.to_milliseconds<unsigned>()) << ".";
-            duration -= detail::milliseconds_to_ns(ms);
-            ss << (us = duration.to_microseconds<unsigned>()) << ".";
-            duration -= detail::microseconds_to_ns(us);
-            ss << (ns = duration.to_nanoseconds<unsigned>()) << ".";
-            duration -= ns;
-#else
-            auto h = std::chrono::duration_cast<std::chrono::hours>(duration);
-            ss << h.count() << ".";
-            duration -= h;
-            auto m = std::chrono::duration_cast<std::chrono::minutes>(duration);
-            ss << m.count() << ".";
-            duration -= m;
-            auto s = std::chrono::duration_cast<std::chrono::seconds>(duration);
-            ss << s.count() << ".";
-            duration -= s;
-            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
-            ss << ms.count() << ".";
-            duration -= ms;
-            auto us = std::chrono::duration_cast<std::chrono::microseconds>(duration);
-            ss << us.count() << ".";
-            duration -= us;
-            auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(duration);
-            ss << ns.count();
-#endif
-            duration -= ns;
         } else {
 #if __cplusplus < 201103L
-            ss << duration.to_nanoseconds<double>() * 1e-09;
+            time_t h, m, s, ms, us, ns = _duration.to_nanoseconds<time_t>();
+            // Extract the values.
+            h  = detail::ns_to_hours(ns, &ns);
+            m  = detail::ns_to_minutes(ns, &ns);
+            s  = detail::ns_to_seconds(ns, &ns);
+            ms = detail::ns_to_milliseconds(ns, &ns);
+            us = detail::ns_to_microseconds(ns, &ns);
 #else
-            ss << (static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count()) * 1e-09);
+            duration_type_t duration = _duration;
+            // Extract the values.
+            time_t h = std::chrono::duration_cast<std::chrono::hours>(duration).count();
+            duration -= std::chrono::duration_cast<std::chrono::hours>(duration);
+            time_t m = std::chrono::duration_cast<std::chrono::minutes>(duration).count();
+            duration -= std::chrono::duration_cast<std::chrono::minutes>(duration);
+            time_t s = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+            duration -= std::chrono::duration_cast<std::chrono::seconds>(duration);
+            time_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+            duration -= std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+            time_t us = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+            duration -= std::chrono::duration_cast<std::chrono::microseconds>(duration);
+            time_t ns = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
 #endif
+            if (_print_mode == human) {
+                if (h)
+                    ss << std::setw(3) << h << "H ";
+                if (m)
+                    ss << std::setw(3) << m << "M ";
+                if (s)
+                    ss << std::setw(3) << s << "s ";
+                if (ms)
+                    ss << std::setw(3) << ms << "m ";
+                if (us)
+                    ss << std::setw(3) << us << "u ";
+                if (ns)
+                    ss << std::setw(3) << ns << "n ";
+            } else if (_print_mode == numeric) {
+                ss << h << "." << m << "." << s << "." << ms << "." << us << "." << ns;
+            } else if (!_format.empty()) {
+                std::string output = _format;
+                replace(output, "%H", to_string(h));
+                replace(output, "%M", to_string(m));
+                replace(output, "%s", to_string(s));
+                replace(output, "%m", to_string(ms));
+                replace(output, "%u", to_string(us));
+                replace(output, "%n", to_string(ns));
+                ss << output;
+            }
         }
         return ss.str();
     }
@@ -216,25 +213,53 @@ public:
     }
 
 private:
+    /// @brief Replaces all occurences of the given substring.
+    /// @param s the input string.
+    /// @param substring the substring that should be replaced.
+    /// @param substitute the substitute.
+    /// @param occurences how many occurences should we replace (-1 = all of them).
+    /// @return a reference to the modified string.
+    static inline std::string &replace(std::string &s, const std::string &substring, const std::string &substitute, int occurences = -1)
+    {
+        // Find the first occurence.
+        std::string::size_type pos = s.find(substring);
+        // Iterate until the end of the string.
+        while (pos != std::string::npos) {
+            // Replace the occurence.
+            s.replace(pos, substring.size(), substitute);
+            // Check how many of them we still need to replace.
+            if ((occurences > 0) && ((--occurences) == 0))
+                break;
+            // Advance to the next occurence.
+            pos = s.find(substring, pos + substitute.size());
+        }
+        return s;
+    }
+
+    /// @brief Transforms the given value into a string.
+    /// @param value the value to transform.
+    /// @return the string representation of the value.
+    template <typename T>
+    static inline std::string to_string(const T &value)
+    {
+        std::stringstream ss;
+        ss << value;
+        return ss.str();
+    }
+
     duration_type_t _duration;
     PrintMode _print_mode;
+    std::string _format;
 };
 
 class Stopwatch {
 public:
-#if __cplusplus < 201103L
-    typedef timespec_t clock_type_t;
-    typedef timespec_t time_point_type_t;
-#else
-    typedef std::chrono::high_resolution_clock clock_type_t;
-    typedef clock_type_t::time_point time_point_type_t;
-#endif
-
-    Stopwatch(PrintMode print_mode = human)
+    Stopwatch(PrintMode print_mode = human, const std::string &format = std::string())
         : _last_time_point(clock_type_t::now()),
-          _total_duration(Duration::zero(), print_mode),
+          _total_duration(Duration::zero(), print_mode, format),
           _partials(),
-          _print_mode(print_mode)
+          _print_mode(print_mode),
+          _format(format)
     {
         // Nothing to do.
     }
@@ -243,15 +268,23 @@ public:
     {
         _print_mode = print_mode;
         _total_duration.set_print_mode(print_mode);
+        for (std::vector<Duration>::iterator it = _partials.begin(); it != _partials.end(); ++it)
+            it->set_print_mode(print_mode);
+    }
+
+    inline void set_format(const std::string &format)
+    {
+        _format = format;
+        _total_duration.set_format(format);
+        for (std::vector<Duration>::iterator it = _partials.begin(); it != _partials.end(); ++it)
+            it->set_format(format);
     }
 
     inline void reset()
     {
-#if __cplusplus < 201103L
-        _total_duration = Duration(Duration::zero(), _print_mode);
-#else
-        _total_duration                  = std::chrono::duration<double>::zero();
-#endif
+        // Reset the total duration.
+        _total_duration = duration_type_t::zero();
+        // Clear all the partials.
         _partials.clear();
         // Star again the timer.
         this->start();
@@ -259,37 +292,22 @@ public:
 
     inline void start()
     {
-#if __cplusplus < 201103L
-        _last_time_point = time_point_type_t::now();
-#else
-        _last_time_point                 = clock_type_t::now();
-#endif
+        _last_time_point = clock_type_t::now();
     }
 
     inline void round()
     {
-#if __cplusplus < 201103L
-        time_point_type_t now     = time_point_type_t::now();
-        time_point_type_t elapsed = now - _last_time_point;
-#else
-        time_point_type_t now            = clock_type_t::now();
-        std::chrono::nanoseconds elapsed = now - _last_time_point;
-#endif
-        _last_time_point = now;
+        time_point_type_t now  = clock_type_t::now();
+        elapsed_time_t elapsed = now - _last_time_point;
+        _last_time_point       = now;
         _total_duration += elapsed;
-        _partials.push_back(Duration(elapsed, _print_mode));
+        _partials.push_back(Duration(elapsed, _print_mode, _format));
     }
 
     Duration last_round() const
     {
-        if (_partials.empty()) {
-#if __cplusplus < 201103L
-            time_point_type_t now = time_point_type_t::now();
-#else
-            time_point_type_t now = clock_type_t::now();
-#endif
-            return Duration(now - _last_time_point, _print_mode);
-        }
+        if (_partials.empty())
+            return Duration(clock_type_t::now() - _last_time_point, _print_mode, _format);
         return _partials.back();
     }
 
@@ -341,6 +359,7 @@ private:
     Duration _total_duration;
     std::vector<Duration> _partials;
     PrintMode _print_mode;
+    std::string _format;
 };
 
 /// @brief Runs the function and samples the elapsed time.

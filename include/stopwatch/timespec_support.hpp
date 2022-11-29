@@ -9,30 +9,80 @@
 namespace stopwatch
 {
 
-static const unsigned long ns_per_sec = 1000000000UL;
-
 namespace detail
 {
-inline unsigned long hours_to_ns(unsigned long value)
+
+static const time_t ns_per_hour        = 3600000000000UL;
+static const time_t ns_per_minute      = 60000000000UL;
+static const time_t ns_per_second      = 1000000000UL;
+static const time_t ns_per_millisecond = 1000000UL;
+static const time_t ns_per_microsecond = 1000UL;
+
+inline time_t hours_to_ns(time_t value)
 {
-    return (value * 3600) * ns_per_sec;
+    return value * ns_per_hour;
 }
-inline unsigned long minutes_to_ns(unsigned long value)
+
+inline time_t minutes_to_ns(time_t value)
 {
-    return (value * 60) * ns_per_sec;
+    return value * ns_per_minute;
 }
-inline unsigned long seconds_to_ns(unsigned long value)
+
+inline time_t seconds_to_ns(time_t value)
 {
-    return value * ns_per_sec;
+    return value * ns_per_second;
 }
-inline unsigned long milliseconds_to_ns(unsigned long value)
+
+inline time_t milliseconds_to_ns(time_t value)
 {
-    return value * 1000000UL;
+    return value * ns_per_millisecond;
 }
-inline unsigned long microseconds_to_ns(unsigned long value)
+
+inline time_t microseconds_to_ns(time_t value)
 {
-    return value * 1000UL;
+    return value * ns_per_microsecond;
 }
+
+inline time_t ns_to_hours(time_t value, time_t *remainder = NULL)
+{
+    time_t result = value / ns_per_hour;
+    if (remainder)
+        *remainder = value % ns_per_hour;
+    return result;
+}
+
+inline time_t ns_to_minutes(time_t value, time_t *remainder = NULL)
+{
+    time_t result = value / ns_per_minute;
+    if (remainder)
+        *remainder = value % ns_per_minute;
+    return result;
+}
+
+inline time_t ns_to_seconds(time_t value, time_t *remainder = NULL)
+{
+    time_t result = value / ns_per_second;
+    if (remainder)
+        *remainder = value % ns_per_second;
+    return result;
+}
+
+inline time_t ns_to_milliseconds(time_t value, time_t *remainder = NULL)
+{
+    time_t result = value / ns_per_millisecond;
+    if (remainder)
+        *remainder = value % ns_per_millisecond;
+    return result;
+}
+
+inline time_t ns_to_microseconds(time_t value, time_t *remainder = NULL)
+{
+    time_t result = value / ns_per_microsecond;
+    if (remainder)
+        *remainder = value % ns_per_microsecond;
+    return result;
+}
+
 } // namespace detail
 
 class timespec_t : public timespec {
@@ -43,12 +93,16 @@ public:
         // Nothing to do.
     }
 
-    template <typename T>
-    timespec_t(const T &ns)
+    timespec_t(const timespec_t &other)
         : timespec()
     {
-        tv_sec  = static_cast<time_t>(ns) / ns_per_sec;
-        tv_nsec = static_cast<long>(ns) % ns_per_sec;
+        tv_sec = other.tv_sec, tv_nsec = other.tv_nsec;
+    }
+
+    timespec_t(time_t ns)
+        : timespec()
+    {
+        tv_sec = detail::ns_to_seconds(ns, &tv_nsec);
         this->normalize();
     }
 
@@ -69,17 +123,17 @@ public:
 
     inline timespec_t &normalize()
     {
-        while (tv_nsec >= static_cast<long>(ns_per_sec)) {
+        while (tv_nsec >= detail::ns_per_second) {
             ++(tv_sec);
-            tv_nsec -= ns_per_sec;
+            tv_nsec -= detail::ns_per_second;
         }
-        while (tv_nsec <= -static_cast<long>(ns_per_sec)) {
+        while (tv_nsec <= -detail::ns_per_second) {
             --(tv_sec);
-            tv_nsec += ns_per_sec;
+            tv_nsec += detail::ns_per_second;
         }
         if (tv_nsec < 0) {
             --(tv_sec);
-            tv_nsec = (ns_per_sec + tv_nsec);
+            tv_nsec = (detail::ns_per_second + tv_nsec);
         }
         return *this;
     }
@@ -87,70 +141,81 @@ public:
     template <typename T>
     inline T to_nanoseconds() const
     {
-        return static_cast<T>((tv_sec * ns_per_sec) + tv_nsec);
+        return static_cast<T>((tv_sec * detail::ns_per_second) + tv_nsec);
     }
 
     template <typename T>
     inline T to_microseconds() const
     {
-        return static_cast<T>(this->to_nanoseconds<unsigned long>() / 1000UL);
+        return static_cast<T>(detail::ns_to_microseconds(this->to_nanoseconds<T>()));
     }
 
     template <typename T>
     inline T to_milliseconds() const
     {
-        return static_cast<T>(this->to_nanoseconds<unsigned long>() / 1000000UL);
+        return static_cast<T>(detail::ns_to_milliseconds(this->to_nanoseconds<T>()));
     }
 
     template <typename T>
     inline T to_seconds() const
     {
-        return static_cast<T>(this->to_nanoseconds<unsigned long>() / ns_per_sec);
+        return static_cast<T>(detail::ns_to_seconds(this->to_nanoseconds<T>()));
     }
 
     template <typename T>
     inline T to_minutes() const
     {
-        return static_cast<T>((this->to_nanoseconds<unsigned long>() / ns_per_sec) / 60);
+        return static_cast<T>(detail::ns_to_minutes(this->to_nanoseconds<T>()));
     }
 
     template <typename T>
     inline T to_hours() const
     {
-        return static_cast<T>((this->to_nanoseconds<unsigned long>() / ns_per_sec) / 3600);
+        return static_cast<T>(detail::ns_to_hours(this->to_nanoseconds<T>()));
     }
 
     inline friend timespec_t operator+(const timespec_t &lhs, const timespec_t &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<unsigned long>() + rhs.to_nanoseconds<unsigned long>());
+        return timespec_t(lhs.to_nanoseconds<time_t>() + rhs.to_nanoseconds<time_t>());
     }
 
     template <typename T>
     inline friend timespec_t operator+(const timespec_t &lhs, const T &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<unsigned long>() + rhs);
+        return timespec_t(lhs.to_nanoseconds<time_t>() + rhs);
     }
 
     inline friend timespec_t operator-(const timespec_t &lhs, const timespec_t &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<unsigned long>() - rhs.to_nanoseconds<unsigned long>());
+        return timespec_t(lhs.to_nanoseconds<time_t>() - rhs.to_nanoseconds<time_t>());
     }
 
     template <typename T>
     inline friend timespec_t operator-(const timespec_t &lhs, const T &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<T>() - rhs);
+        return timespec_t(lhs.to_nanoseconds<time_t>() - rhs);
+    }
+
+    inline friend timespec_t operator*(const timespec_t &lhs, const timespec_t &rhs)
+    {
+        return timespec_t(lhs.to_nanoseconds<time_t>() * rhs.to_nanoseconds<time_t>());
+    }
+
+    template <typename T>
+    inline friend timespec_t operator*(const timespec_t &lhs, const T &rhs)
+    {
+        return timespec_t(lhs.to_nanoseconds<time_t>() * rhs);
     }
 
     inline friend timespec_t operator/(const timespec_t &lhs, const timespec_t &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<unsigned long>() / rhs.to_nanoseconds<unsigned long>());
+        return timespec_t(lhs.to_nanoseconds<time_t>() / rhs.to_nanoseconds<time_t>());
     }
 
     template <typename T>
     inline friend timespec_t operator/(const timespec_t &lhs, const T &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<T>() / rhs);
+        return timespec_t(lhs.to_nanoseconds<time_t>() / rhs);
     }
 
     inline friend timespec_t &operator+=(timespec_t &lhs, const timespec_t &rhs)
@@ -175,6 +240,17 @@ public:
         return (lhs = lhs - rhs);
     }
 
+    inline friend timespec_t &operator*=(timespec_t &lhs, const timespec_t &rhs)
+    {
+        return (lhs = lhs * rhs);
+    }
+
+    template <typename T>
+    inline friend timespec_t &operator*=(timespec_t &lhs, const T &rhs)
+    {
+        return (lhs = lhs * rhs);
+    }
+
     inline friend timespec_t &operator/=(timespec_t &lhs, const timespec_t &rhs)
     {
         return (lhs = lhs / rhs);
@@ -184,6 +260,12 @@ public:
     inline friend timespec_t &operator/=(timespec_t &lhs, const T &rhs)
     {
         return (lhs = lhs / rhs);
+    }
+
+    inline timespec_t &operator=(const timespec_t &other)
+    {
+        tv_sec = other.tv_sec, tv_nsec = other.tv_nsec;
+        return *this;
     }
 };
 

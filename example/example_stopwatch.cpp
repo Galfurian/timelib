@@ -102,11 +102,19 @@ int main(int, char *[])
     stopwatch::ntimes<runs>(sw, [&] { values = generate_random_values(size); });
 #endif
 
+    std::cout << 60 * 1000000000UL << "\n";
+
     sw.set_print_mode(stopwatch::human);
     std::cout << "Generate      : " << sw.mean() << "\n";
     sw.set_print_mode(stopwatch::numeric);
     std::cout << "Generate      : " << sw.mean() << "\n";
     sw.set_print_mode(stopwatch::total);
     std::cout << "Generate      : " << sw.mean() << "\n";
+
+    std::cout << "\n";
+    sw.set_print_mode(stopwatch::custom);
+    sw.set_format("%H:%M:%s:%m:%u:%n");
+    std::cout << "Generate      : " << sw.mean() << "\n";
+
     return 0;
 }
