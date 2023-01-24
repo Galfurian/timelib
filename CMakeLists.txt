@@ -8,6 +8,12 @@ cmake_minimum_required(VERSION 3.1...3.18)
 # Set the project name.
 project(stopwatch CXX)
 
+# Set the default build type to Debug.
+if(NOT CMAKE_BUILD_TYPE)
+    message(STATUS "Setting build type to 'Debug' as none was specified.")
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
+endif()
+
 # -----------------------------------------------------------------------------
 # Add options.
 # -----------------------------------------------------------------------------
@@ -18,18 +24,16 @@ option(STOPWATCH_WARNINGS_AS_ERRORS "Treat all warnings as errors for stopwatch"
 # -----------------------------------------------------------------------------
 # Set the compilation flags.
 # -----------------------------------------------------------------------------
-set(STOPWATCH_COMPILE_OPTIONS "${STOPWATCH_COMPILE_OPTIONS} -std=c++98")
-
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Disable warnings that suggest using MSVC-specific safe functions
-    set(STOPWATCH_COMPILE_OPTIONS "${STOPWATCH_COMPILE_OPTIONS} -D_CRT_SECURE_NO_WARNINGS")
+    set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} -D_CRT_SECURE_NO_WARNINGS)
 
     if(STOPWATCH_WARNINGS_AS_ERRORS)
-        set(STOPWATCH_COMPILE_OPTIONS "${STOPWATCH_COMPILE_OPTIONS} /WX")
+        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} /WX)
     endif(STOPWATCH_WARNINGS_AS_ERRORS)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if(STOPWATCH_WARNINGS_AS_ERRORS)
-        set(STOPWATCH_COMPILE_OPTIONS "${STOPWATCH_COMPILE_OPTIONS} -Werror")
+        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} -Werror)
     endif(STOPWATCH_WARNINGS_AS_ERRORS)
 endif()
 
@@ -37,17 +41,15 @@ if(STOPWATCH_STRICT_WARNINGS)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         # Mark system headers as external for MSVC explicitly
         # https://devblogs.microsoft.com/cppblog/broken-warnings-theory
-        set(STOPWATCH_COMPILE_OPTIONS "${STOPWATCH_COMPILE_OPTIONS} /experimental:external")
-        set(STOPWATCH_COMPILE_OPTIONS "${STOPWATCH_COMPILE_OPTIONS} /external:I ${CMAKE_BINARY_DIR}")
-        set(STOPWATCH_COMPILE_OPTIONS "${STOPWATCH_COMPILE_OPTIONS} /external:anglebrackets")
-        set(STOPWATCH_COMPILE_OPTIONS "${STOPWATCH_COMPILE_OPTIONS} /external:W0")
-        set(STOPWATCH_COMPILE_OPTIONS "${STOPWATCH_COMPILE_OPTIONS} /W4")
+        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} /experimental:external)
+        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} /external:I ${CMAKE_BINARY_DIR})
+        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} /external:anglebrackets)
+        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} /external:W0)
+        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} /W4)
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(STOPWATCH_COMPILE_OPTIONS "${STOPWATCH_COMPILE_OPTIONS} -Wall -Wextra -Wconversion -pedantic")
+        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} -Wall -Wextra -Wconversion -pedantic)
     endif()
 endif(STOPWATCH_STRICT_WARNINGS)
-
-string(REPLACE " " ";" STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS})
 
 # -----------------------------------------------------------------------------
 # LIBRARY
@@ -66,14 +68,20 @@ target_compile_options(stopwatch INTERFACE ${STOPWATCH_COMPILE_OPTIONS})
 # -----------------------------------------------------------------------------
 if(STOPWATCH_BUILD_EXAMPLES)
     # Add the example.
-    add_executable(example_stopwatch example/example_stopwatch.cpp)
-
+    add_executable(example_cpp11 example/example_cpp11.cpp)
     # Inlcude header directories.
-    target_include_directories(example_stopwatch PUBLIC ${PROJECT_SOURCE_DIR}/include)
-
+    target_include_directories(example_cpp11 PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Link libraries.
-    target_link_libraries(example_stopwatch PUBLIC stopwatch)
-
+    target_link_libraries(example_cpp11 PUBLIC stopwatch)
     # Set compilation flags.
-    target_compile_options(example_stopwatch PUBLIC ${STOPWATCH_COMPILE_OPTIONS})
+    target_compile_options(example_cpp11 PUBLIC ${STOPWATCH_COMPILE_OPTIONS} -std=c++11)
+    
+    # Add the example.
+    add_executable(example_cpp98 example/example_cpp98.cpp)
+    # Inlcude header directories.
+    target_include_directories(example_cpp98 PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    # Link libraries.
+    target_link_libraries(example_cpp98 PUBLIC stopwatch)
+    # Set compilation flags.
+    target_compile_options(example_cpp98 PUBLIC ${STOPWATCH_COMPILE_OPTIONS} -std=c++98)
 endif(STOPWATCH_BUILD_EXAMPLES)
