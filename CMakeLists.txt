@@ -70,7 +70,7 @@ target_compile_options(stopwatch INTERFACE ${STOPWATCH_COMPILE_OPTIONS})
 if(STOPWATCH_BUILD_EXAMPLES)
 
     # Add the example.
-    add_executable(example_cpp11 ${PROJECT_SOURCE_DIR}/example/example_cpp11.cpp)
+    add_executable(example_cpp11 ${PROJECT_SOURCE_DIR}/examples/example_cpp11.cpp)
     # Inlcude header directories.
     target_include_directories(example_cpp11 PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Set compilation flags.
@@ -79,7 +79,7 @@ if(STOPWATCH_BUILD_EXAMPLES)
     target_link_libraries(example_cpp11 PUBLIC stopwatch)
     
     # Add the example.
-    add_executable(example_cpp98 ${PROJECT_SOURCE_DIR}/example/example_cpp98.cpp)
+    add_executable(example_cpp98 ${PROJECT_SOURCE_DIR}/examples/example_cpp98.cpp)
     # Inlcude header directories.
     target_include_directories(example_cpp98 PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Set compilation flags.
