@@ -56,34 +56,36 @@ endif(STOPWATCH_STRICT_WARNINGS)
 # LIBRARY
 # -----------------------------------------------------------------------------
 # Add the C++ library.
-add_library(${PROJECT_NAME} INTERFACE)
-add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+add_library(stopwatch INTERFACE)
+add_library(stopwatch::stopwatch ALIAS stopwatch)
 # Inlcude header directories.
-target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(stopwatch INTERFACE ${PROJECT_SOURCE_DIR}/include)
 # Set compilation flags.
-target_compile_options(${PROJECT_NAME} INTERFACE ${STOPWATCH_COMPILE_OPTIONS})
+target_compile_options(stopwatch INTERFACE ${STOPWATCH_COMPILE_OPTIONS})
 
 # -----------------------------------------------------------------------------
 # EXAMPLES
 # -----------------------------------------------------------------------------
 if(STOPWATCH_BUILD_EXAMPLES)
+
     # Add the example.
-    add_executable(example_cpp11 example/example_cpp11.cpp)
+    add_executable(example_cpp11 ${PROJECT_SOURCE_DIR}/example/example_cpp11.cpp)
     # Inlcude header directories.
     target_include_directories(example_cpp11 PUBLIC ${PROJECT_SOURCE_DIR}/include)
-    # Link libraries.
-    target_link_libraries(example_cpp11 PUBLIC stopwatch)
     # Set compilation flags.
     target_compile_options(example_cpp11 PUBLIC ${STOPWATCH_COMPILE_OPTIONS} -std=c++11)
+    # Link libraries.
+    target_link_libraries(example_cpp11 PUBLIC stopwatch)
     
     # Add the example.
-    add_executable(example_cpp98 example/example_cpp98.cpp)
+    add_executable(example_cpp98 ${PROJECT_SOURCE_DIR}/example/example_cpp98.cpp)
     # Inlcude header directories.
     target_include_directories(example_cpp98 PUBLIC ${PROJECT_SOURCE_DIR}/include)
-    # Link libraries.
-    target_link_libraries(example_cpp98 PUBLIC stopwatch)
     # Set compilation flags.
     target_compile_options(example_cpp98 PUBLIC ${STOPWATCH_COMPILE_OPTIONS} -std=c++98)
+    # Link libraries.
+    target_link_libraries(example_cpp98 PUBLIC stopwatch)
+
 endif(STOPWATCH_BUILD_EXAMPLES)
 
 # -----------------------------------------------------------------------------
@@ -103,7 +105,13 @@ if(DOXYGEN_FOUND)
     )
     FetchContent_GetProperties(doxygenawesome)
     if(NOT doxygenawesome_POPULATED)
+        # Ensures the named dependencies have been populated.
         FetchContent_MakeAvailable(doxygenawesome)
+        # Hide fetchcontent variables, otherwise with ccmake it's a mess.
+        mark_as_advanced(FORCE
+            FETCHCONTENT_QUIET FETCHCONTENT_BASE_DIR FETCHCONTENT_FULLY_DISCONNECTED FETCHCONTENT_UPDATES_DISCONNECTED
+            FETCHCONTENT_UPDATES_DISCONNECTED_DOXYGENAWESOME FETCHCONTENT_SOURCE_DIR_DOXYGENAWESOME
+        )
     endif()
 
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE README.md)
@@ -116,7 +124,7 @@ if(DOXYGEN_FOUND)
         ${doxygenawesome_SOURCE_DIR}/doxygen-awesome-darkmode-toggle.js
     )
 
-    doxygen_add_docs(${PROJECT_NAME}_documentation
+    doxygen_add_docs(stopwatch_documentation
         ${PROJECT_SOURCE_DIR}/include/stopwatch/timespec_support.hpp
         ${PROJECT_SOURCE_DIR}/include/stopwatch/stopwatch.hpp
         ${PROJECT_SOURCE_DIR}/README.md

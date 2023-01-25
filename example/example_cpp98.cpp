@@ -1,7 +1,7 @@
 #include "stopwatch/stopwatch.hpp"
 
-#include <cstdlib>
 #include <vector>
+#include <cstdlib>
 
 inline std::vector<double> generate_random_values(unsigned size)
 {
@@ -81,8 +81,6 @@ int main(int, char *[])
     std::cout << "Generate      : " << sw.mean() << "\n";
     sw.set_print_mode(stopwatch::total);
     std::cout << "Generate      : " << sw.mean() << "\n";
-
-    std::cout << "\n";
     sw.set_print_mode(stopwatch::custom);
     sw.set_format("%H:%M:%s:%m:%u:%n");
     std::cout << "Generate      : " << sw.mean() << "\n";
