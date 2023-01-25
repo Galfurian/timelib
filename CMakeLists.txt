@@ -55,6 +55,7 @@ endif(STOPWATCH_STRICT_WARNINGS)
 # -----------------------------------------------------------------------------
 # LIBRARY
 # -----------------------------------------------------------------------------
+
 # Add the C++ library.
 add_library(stopwatch INTERFACE)
 add_library(stopwatch::stopwatch ALIAS stopwatch)
@@ -94,16 +95,20 @@ endif(STOPWATCH_BUILD_EXAMPLES)
 
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-    # Doxygen theme.
-    include(FetchContent)
-
     message(STATUS "Retrieving `doxygen-awesome-css`...")
+    
+    # = RETIVAL ===============================================================
+    # Include fetch content.
+    include(FetchContent)
+    # Record the options that describe how to populate the specified content.
     FetchContent_Declare(
         doxygenawesome
         GIT_REPOSITORY https://github.com/jothepro/doxygen-awesome-css
         GIT_TAG 4cd62308d825fe0396d2f66ffbab45d0e247724c # 2.0.3
     )
+    # Retrieve the properties related to the content.
     FetchContent_GetProperties(doxygenawesome)
+    # If not populated, make the content available.
     if(NOT doxygenawesome_POPULATED)
         # Ensures the named dependencies have been populated.
         FetchContent_MakeAvailable(doxygenawesome)
@@ -114,7 +119,10 @@ if(DOXYGEN_FOUND)
         )
     endif()
 
+    # = CUSTOMIZATION =========================================================
+    set(DOXYGEN_PROJECT_NAME "Stopwatch")
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE README.md)
+    set(DOXYGEN_SHOW_INCLUDE_FILES NO)
     set(DOXYGEN_GENERATE_TREEVIEW YES)
     set(DOXYGEN_HTML_HEADER ${doxygenawesome_SOURCE_DIR}/doxygen-custom/header.html)
     set(DOXYGEN_HTML_EXTRA_STYLESHEET ${doxygenawesome_SOURCE_DIR}/doxygen-awesome.css)
@@ -123,10 +131,10 @@ if(DOXYGEN_FOUND)
         ${doxygenawesome_SOURCE_DIR}/doxygen-awesome-paragraph-link.js
         ${doxygenawesome_SOURCE_DIR}/doxygen-awesome-darkmode-toggle.js
     )
-
-    doxygen_add_docs(stopwatch_documentation
+    doxygen_add_docs(
+        ${PROJECT_NAME}_documentation
+        ${PROJECT_SOURCE_DIR}/README.md
         ${PROJECT_SOURCE_DIR}/include/stopwatch/timespec_support.hpp
         ${PROJECT_SOURCE_DIR}/include/stopwatch/stopwatch.hpp
-        ${PROJECT_SOURCE_DIR}/README.md
     )
 endif()
