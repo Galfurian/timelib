@@ -17,6 +17,7 @@ endif()
 # -----------------------------------------------------------------------------
 # OPTIONS
 # -----------------------------------------------------------------------------
+
 option(STOPWATCH_BUILD_EXAMPLES "Build examples" OFF)
 option(STOPWATCH_STRICT_WARNINGS "Enable strict compiler warnings" ON)
 option(STOPWATCH_WARNINGS_AS_ERRORS "Treat all warnings as errors" OFF)
@@ -57,35 +58,36 @@ endif(STOPWATCH_STRICT_WARNINGS)
 # -----------------------------------------------------------------------------
 
 # Add the C++ library.
-add_library(stopwatch INTERFACE)
-add_library(stopwatch::stopwatch ALIAS stopwatch)
+add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 # Inlcude header directories.
-target_include_directories(stopwatch INTERFACE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
 # Set compilation flags.
-target_compile_options(stopwatch INTERFACE ${STOPWATCH_COMPILE_OPTIONS})
+target_compile_options(${PROJECT_NAME} INTERFACE ${STOPWATCH_COMPILE_OPTIONS})
 
 # -----------------------------------------------------------------------------
 # EXAMPLES
 # -----------------------------------------------------------------------------
+
 if(STOPWATCH_BUILD_EXAMPLES)
 
     # Add the example.
-    add_executable(example_cpp11 ${PROJECT_SOURCE_DIR}/examples/example_cpp11.cpp)
-    # Inlcude header directories.
-    target_include_directories(example_cpp11 PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    add_executable(${PROJECT_NAME}_example_cpp11 ${PROJECT_SOURCE_DIR}/examples/example_cpp11.cpp)
     # Set compilation flags.
-    target_compile_options(example_cpp11 PUBLIC ${STOPWATCH_COMPILE_OPTIONS} -std=c++11)
-    # Link libraries.
-    target_link_libraries(example_cpp11 PUBLIC stopwatch)
+    target_compile_options(${PROJECT_NAME}_example_cpp11 PUBLIC ${STOPWATCH_COMPILE_OPTIONS} -std=c++11)
+    # Inlcude header directories.
+    target_include_directories(${PROJECT_NAME}_example_cpp11 PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    # Set the linked libraries.
+    target_link_libraries(${PROJECT_NAME}_example_cpp11 PUBLIC ${PROJECT_NAME})
     
     # Add the example.
-    add_executable(example_cpp98 ${PROJECT_SOURCE_DIR}/examples/example_cpp98.cpp)
-    # Inlcude header directories.
-    target_include_directories(example_cpp98 PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    add_executable(${PROJECT_NAME}_example_cpp98 ${PROJECT_SOURCE_DIR}/examples/example_cpp98.cpp)
     # Set compilation flags.
-    target_compile_options(example_cpp98 PUBLIC ${STOPWATCH_COMPILE_OPTIONS} -std=c++98)
-    # Link libraries.
-    target_link_libraries(example_cpp98 PUBLIC stopwatch)
+    target_compile_options(${PROJECT_NAME}_example_cpp98 PUBLIC ${STOPWATCH_COMPILE_OPTIONS} -std=c++98)
+    # Inlcude header directories.
+    target_include_directories(${PROJECT_NAME}_example_cpp98 PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    # Set the linked libraries.
+    target_link_libraries(${PROJECT_NAME}_example_cpp98 PUBLIC ${PROJECT_NAME})
 
 endif(STOPWATCH_BUILD_EXAMPLES)
 
@@ -94,6 +96,7 @@ endif(STOPWATCH_BUILD_EXAMPLES)
 # -----------------------------------------------------------------------------
 
 find_package(Doxygen)
+
 if(DOXYGEN_FOUND)
     message(STATUS "Retrieving `doxygen-awesome-css`...")
     
