@@ -28,7 +28,7 @@ jobs:
             - name: Generate documentation
               run: |
                   cmake -B build -DDOXYGEN_WARN_AS_ERROR=NO
-                  cmake --build build --target json_documentation
+                  cmake --build build --target stopwatch_documentation
     build:
         name: Build
         strategy:
