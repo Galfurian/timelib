@@ -215,7 +215,7 @@ public:
     template <typename T>
     inline friend timespec_t operator/(const timespec_t &lhs, const T &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<time_t>() / rhs);
+        return timespec_t(lhs.to_nanoseconds<time_t>() / static_cast<time_t>(rhs));
     }
 
     inline friend timespec_t &operator+=(timespec_t &lhs, const timespec_t &rhs)

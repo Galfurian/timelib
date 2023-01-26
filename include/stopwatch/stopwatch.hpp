@@ -127,14 +127,14 @@ public:
     template <typename T>
     inline Duration &operator/=(const Duration &rhs)
     {
-        _duration = _duration / rhs._duration;
+        _duration = duration_type_t(_duration / rhs._duration);
         return *this;
     }
 
     template <typename T>
     inline Duration &operator/=(const T &rhs)
     {
-        _duration = _duration / rhs;
+        _duration = duration_type_t(_duration / rhs);
         return *this;
     }
 
