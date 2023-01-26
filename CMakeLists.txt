@@ -74,20 +74,24 @@ if(STOPWATCH_BUILD_EXAMPLES)
     # Add the example.
     add_executable(${PROJECT_NAME}_example_cpp11 ${PROJECT_SOURCE_DIR}/examples/example_cpp11.cpp)
     # Set compilation flags.
-    target_compile_options(${PROJECT_NAME}_example_cpp11 PUBLIC ${STOPWATCH_COMPILE_OPTIONS} -std=c++11)
+    target_compile_options(${PROJECT_NAME}_example_cpp11 PUBLIC ${STOPWATCH_COMPILE_OPTIONS})
     # Inlcude header directories.
     target_include_directories(${PROJECT_NAME}_example_cpp11 PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Set the linked libraries.
     target_link_libraries(${PROJECT_NAME}_example_cpp11 PUBLIC ${PROJECT_NAME})
+    # Set compiler flags.
+    target_compile_features(${PROJECT_NAME}_example_cpp11 PUBLIC cxx_std_11)
     
     # Add the example.
     add_executable(${PROJECT_NAME}_example_cpp98 ${PROJECT_SOURCE_DIR}/examples/example_cpp98.cpp)
     # Set compilation flags.
-    target_compile_options(${PROJECT_NAME}_example_cpp98 PUBLIC ${STOPWATCH_COMPILE_OPTIONS} -std=c++98)
+    target_compile_options(${PROJECT_NAME}_example_cpp98 PUBLIC ${STOPWATCH_COMPILE_OPTIONS})
     # Inlcude header directories.
     target_include_directories(${PROJECT_NAME}_example_cpp98 PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Set the linked libraries.
     target_link_libraries(${PROJECT_NAME}_example_cpp98 PUBLIC ${PROJECT_NAME})
+    # Set compiler flags.
+    target_compile_features(${PROJECT_NAME}_example_cpp98 PUBLIC cxx_std_98)
 
 endif(STOPWATCH_BUILD_EXAMPLES)
 

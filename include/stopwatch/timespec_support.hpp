@@ -4,6 +4,8 @@
 
 #pragma once
 
+#define _USE_32BIT_TIME_T
+
 #include <time.h>
 
 namespace stopwatch
@@ -109,7 +111,11 @@ public:
     static inline timespec_t now()
     {
         timespec_t ts;
+#ifdef _WIN32
+        timespec_get(&ts, TIME_UTC);
+#else
         clock_gettime(CLOCK_REALTIME, &ts);
+#endif
         return ts;
     }
 
