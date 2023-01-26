@@ -104,7 +104,7 @@ public:
     timespec_t(time_t ns)
         : timespec()
     {
-        tv_sec = detail::ns_to_seconds(ns, &tv_nsec);
+        tv_sec = detail::ns_to_seconds(ns, reinterpret_cast<time_t *>(&tv_nsec));
         this->normalize();
     }
 
