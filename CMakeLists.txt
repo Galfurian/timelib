@@ -102,7 +102,6 @@ endif(STOPWATCH_BUILD_EXAMPLES)
 find_package(Doxygen)
 
 if(DOXYGEN_FOUND)
-    message(STATUS "Retrieving `doxygen-awesome-css`...")
     
     # = RETIVAL ===============================================================
     # Include fetch content.
@@ -117,6 +116,7 @@ if(DOXYGEN_FOUND)
     FetchContent_GetProperties(doxygenawesome)
     # If not populated, make the content available.
     if(NOT doxygenawesome_POPULATED)
+        message(STATUS "Retrieving `doxygen-awesome-css`...")
         # Ensures the named dependencies have been populated.
         FetchContent_MakeAvailable(doxygenawesome)
         # Hide fetchcontent variables, otherwise with ccmake it's a mess.
@@ -131,6 +131,7 @@ if(DOXYGEN_FOUND)
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE README.md)
     set(DOXYGEN_SHOW_INCLUDE_FILES NO)
     set(DOXYGEN_GENERATE_TREEVIEW YES)
+    set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
     set(DOXYGEN_HTML_HEADER ${doxygenawesome_SOURCE_DIR}/doxygen-custom/header.html)
     set(DOXYGEN_HTML_EXTRA_STYLESHEET ${doxygenawesome_SOURCE_DIR}/doxygen-awesome.css)
     set(DOXYGEN_HTML_EXTRA_FILES
