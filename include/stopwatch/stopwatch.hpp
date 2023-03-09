@@ -89,13 +89,13 @@ public:
     template <typename T>
     inline Duration operator/(const Duration &rhs) const
     {
-        return Duration(_duration + rhs._duration, _print_mode, _format);
+        return Duration(_duration / rhs._duration, _print_mode, _format);
     }
 
     template <typename T>
     inline Duration operator/(const T &rhs) const
     {
-        return Duration(_duration + rhs, _print_mode, _format);
+        return Duration(_duration / rhs, _print_mode, _format);
     }
 
     inline Duration &operator+=(const Duration &rhs)
@@ -127,14 +127,14 @@ public:
     template <typename T>
     inline Duration &operator/=(const Duration &rhs)
     {
-        _duration = duration_type_t(_duration / rhs._duration);
+        _duration = _duration / rhs._duration;
         return *this;
     }
 
     template <typename T>
     inline Duration &operator/=(const T &rhs)
     {
-        _duration = duration_type_t(_duration / rhs);
+        _duration = _duration / rhs;
         return *this;
     }
 
@@ -295,13 +295,15 @@ public:
         _last_time_point = clock_type_t::now();
     }
 
-    inline void round()
+    inline Duration round()
     {
         time_point_type_t now  = clock_type_t::now();
         elapsed_time_t elapsed = now - _last_time_point;
         _last_time_point       = now;
         _total_duration += elapsed;
-        _partials.push_back(Duration(elapsed, _print_mode, _format));
+        Duration duration(elapsed, _print_mode, _format);
+        _partials.push_back(duration);
+        return duration;
     }
 
     Duration last_round() const
@@ -316,12 +318,9 @@ public:
         return _total_duration;
     }
 
-    Stopwatch mean() const
+    Duration mean() const
     {
-        Stopwatch sw(*this);
-        sw._total_duration /= _partials.size();
-        sw._partials.clear();
-        return sw;
+        return _total_duration / _partials.size();
     }
 
     inline std::vector<Duration> partials() const
