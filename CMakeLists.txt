@@ -15,43 +15,32 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # -----------------------------------------------------------------------------
+# ENABLE FETCH CONTENT
+# -----------------------------------------------------------------------------
+
+# We need this in order to import external projects.
+include(FetchContent)
+# Hide fetchcontent variables.
+mark_as_advanced(FORCE
+    FETCHCONTENT_QUIET
+    FETCHCONTENT_BASE_DIR
+    FETCHCONTENT_FULLY_DISCONNECTED
+    FETCHCONTENT_UPDATES_DISCONNECTED
+)
+
+# -----------------------------------------------------------------------------
 # OPTIONS
 # -----------------------------------------------------------------------------
 
-option(STOPWATCH_BUILD_EXAMPLES "Build examples" OFF)
-option(STOPWATCH_STRICT_WARNINGS "Enable strict compiler warnings" ON)
-option(STOPWATCH_WARNINGS_AS_ERRORS "Treat all warnings as errors" OFF)
+option(${PROJECT_NAME}_BUILD_EXAMPLES "Build examples" OFF)
+option(${PROJECT_NAME}_STRICT_WARNINGS "Enable strict compiler warnings" ON)
+option(${PROJECT_NAME}_WARNINGS_AS_ERRORS "Treat all warnings as errors" OFF)
 
 # -----------------------------------------------------------------------------
-# COMPILATION FLAGS
+# DEPENDENCY (SYSTEM LIBRARIES)
 # -----------------------------------------------------------------------------
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    # Disable warnings that suggest using MSVC-specific safe functions
-    set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} -D_CRT_SECURE_NO_WARNINGS)
-
-    if(STOPWATCH_WARNINGS_AS_ERRORS)
-        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} /WX)
-    endif(STOPWATCH_WARNINGS_AS_ERRORS)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    if(STOPWATCH_WARNINGS_AS_ERRORS)
-        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} -Werror)
-    endif(STOPWATCH_WARNINGS_AS_ERRORS)
-endif()
-
-if(STOPWATCH_STRICT_WARNINGS)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        # Mark system headers as external for MSVC explicitly
-        # https://devblogs.microsoft.com/cppblog/broken-warnings-theory
-        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} /experimental:external)
-        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} /external:I ${CMAKE_BINARY_DIR})
-        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} /external:anglebrackets)
-        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} /external:W0)
-        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} /W4)
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(STOPWATCH_COMPILE_OPTIONS ${STOPWATCH_COMPILE_OPTIONS} -Wall -Wextra -Wconversion -pedantic)
-    endif()
-endif(STOPWATCH_STRICT_WARNINGS)
+find_package(Doxygen)
 
 # -----------------------------------------------------------------------------
 # LIBRARY
@@ -62,19 +51,45 @@ add_library(${PROJECT_NAME} INTERFACE)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 # Inlcude header directories.
 target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
-# Set compilation flags.
-target_compile_options(${PROJECT_NAME} INTERFACE ${STOPWATCH_COMPILE_OPTIONS})
+
+# -----------------------------------------------------------------------------
+# COMPILATION FLAGS
+# -----------------------------------------------------------------------------
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    # Disable warnings that suggest using MSVC-specific safe functions
+    target_compile_definitions(${PROJECT_NAME} INTERFACE _CRT_SECURE_NO_WARNINGS)
+    if(${PROJECT_NAME}_WARNINGS_AS_ERRORS)
+        target_compile_options(${PROJECT_NAME} INTERFACE /WX)
+    endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if(${PROJECT_NAME}_WARNINGS_AS_ERRORS)
+        target_compile_options(${PROJECT_NAME} INTERFACE -Werror)
+    endif()
+endif()
+
+if(${PROJECT_NAME}_STRICT_WARNINGS)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        # Mark system headers as external for MSVC explicitly
+        # https://devblogs.microsoft.com/cppblog/broken-warnings-theory
+        target_compile_options(${PROJECT_NAME} INTERFACE /experimental:external)
+        target_compile_options(${PROJECT_NAME} INTERFACE /external:I ${CMAKE_BINARY_DIR})
+        target_compile_options(${PROJECT_NAME} INTERFACE /external:anglebrackets)
+        target_compile_options(${PROJECT_NAME} INTERFACE /external:W0)
+
+        target_compile_options(${PROJECT_NAME} INTERFACE /W4)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(${PROJECT_NAME} INTERFACE -Wall -Wextra -Wconversion -pedantic)
+    endif()
+endif()
 
 # -----------------------------------------------------------------------------
 # EXAMPLES
 # -----------------------------------------------------------------------------
 
-if(STOPWATCH_BUILD_EXAMPLES)
+if(${PROJECT_NAME}_BUILD_EXAMPLES)
 
     # Add the example.
     add_executable(${PROJECT_NAME}_example_cpp11 ${PROJECT_SOURCE_DIR}/examples/example_cpp11.cpp)
-    # Set compilation flags.
-    target_compile_options(${PROJECT_NAME}_example_cpp11 PUBLIC ${STOPWATCH_COMPILE_OPTIONS})
     # Inlcude header directories.
     target_include_directories(${PROJECT_NAME}_example_cpp11 PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Set the linked libraries.
@@ -84,8 +99,6 @@ if(STOPWATCH_BUILD_EXAMPLES)
     
     # Add the example.
     add_executable(${PROJECT_NAME}_example_cpp98 ${PROJECT_SOURCE_DIR}/examples/example_cpp98.cpp)
-    # Set compilation flags.
-    target_compile_options(${PROJECT_NAME}_example_cpp98 PUBLIC ${STOPWATCH_COMPILE_OPTIONS})
     # Inlcude header directories.
     target_include_directories(${PROJECT_NAME}_example_cpp98 PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Set the linked libraries.
@@ -93,19 +106,14 @@ if(STOPWATCH_BUILD_EXAMPLES)
     # Set compiler flags.
     target_compile_features(${PROJECT_NAME}_example_cpp98 PUBLIC cxx_std_98)
 
-endif(STOPWATCH_BUILD_EXAMPLES)
+endif()
 
 # -----------------------------------------------------------------------------
 # DOCUMENTATION
 # -----------------------------------------------------------------------------
 
-find_package(Doxygen)
-
 if(DOXYGEN_FOUND)
     
-    # = RETIVAL ===============================================================
-    # Include fetch content.
-    include(FetchContent)
     # Record the options that describe how to populate the specified content.
     FetchContent_Declare(
         doxygenawesome
@@ -121,14 +129,14 @@ if(DOXYGEN_FOUND)
         FetchContent_MakeAvailable(doxygenawesome)
         # Hide fetchcontent variables, otherwise with ccmake it's a mess.
         mark_as_advanced(FORCE
-            FETCHCONTENT_QUIET FETCHCONTENT_BASE_DIR FETCHCONTENT_FULLY_DISCONNECTED FETCHCONTENT_UPDATES_DISCONNECTED
-            FETCHCONTENT_UPDATES_DISCONNECTED_DOXYGENAWESOME FETCHCONTENT_SOURCE_DIR_DOXYGENAWESOME
+            FETCHCONTENT_UPDATES_DISCONNECTED_DOXYGENAWESOME
+            FETCHCONTENT_SOURCE_DIR_DOXYGENAWESOME
         )
     endif()
 
     # = CUSTOMIZATION =========================================================
-    set(DOXYGEN_PROJECT_NAME "Stopwatch")
-    set(DOXYGEN_USE_MDFILE_AS_MAINPAGE README.md)
+    set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
+    set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${PROJECT_SOURCE_DIR}/README.md)
     set(DOXYGEN_SHOW_INCLUDE_FILES NO)
     set(DOXYGEN_GENERATE_TREEVIEW YES)
     set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
