@@ -135,11 +135,11 @@ if(DOXYGEN_FOUND)
     endif()
 
     # = CUSTOMIZATION =========================================================
+    set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
     set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${PROJECT_SOURCE_DIR}/README.md)
     set(DOXYGEN_SHOW_INCLUDE_FILES NO)
     set(DOXYGEN_GENERATE_TREEVIEW YES)
-    set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
     set(DOXYGEN_HTML_HEADER ${doxygenawesome_SOURCE_DIR}/doxygen-custom/header.html)
     set(DOXYGEN_HTML_EXTRA_STYLESHEET ${doxygenawesome_SOURCE_DIR}/doxygen-awesome.css)
     set(DOXYGEN_HTML_EXTRA_FILES
