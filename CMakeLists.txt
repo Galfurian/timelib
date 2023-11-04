@@ -151,7 +151,7 @@ if(DOXYGEN_FOUND)
         ${doxygenawesome_SOURCE_DIR}/doxygen-awesome-darkmode-toggle.js
     )
     doxygen_add_docs(
-        documentation
+        ${PROJECT_NAME}_documentation
         ${PROJECT_SOURCE_DIR}/README.md
         ${PROJECT_SOURCE_DIR}/include/stopwatch/timespec_support.hpp
         ${PROJECT_SOURCE_DIR}/include/stopwatch/stopwatch.hpp
