@@ -54,6 +54,16 @@ public:
         return duration_type_t::zero();
     }
 
+    inline double count() const
+    {
+        return _duration.count();
+    }
+
+    inline double operator()() const
+    {
+        return _duration.count();
+    }
+
     inline void set_print_mode(PrintMode print_mode)
     {
         _print_mode = print_mode;
