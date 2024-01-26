@@ -15,7 +15,7 @@ namespace stopwatch
 
 class Duration {
 public:
-    Duration(duration_type_t duration, PrintMode print_mode, const std::string &format)
+    Duration(duration_type_t duration, print_mode_t print_mode, const std::string &format)
         : _duration(duration),
           _print_mode(print_mode),
           _format(format)
@@ -38,7 +38,7 @@ public:
         return _duration.count();
     }
 
-    inline void set_print_mode(PrintMode print_mode)
+    inline void set_print_mode(print_mode_t print_mode)
     {
         _print_mode = print_mode;
     }
@@ -232,7 +232,7 @@ private:
     }
 
     duration_type_t _duration;
-    PrintMode _print_mode;
+    print_mode_t _print_mode;
     std::string _format;
 };
 

@@ -21,7 +21,7 @@ namespace stopwatch
 
 class Stopwatch {
 public:
-    Stopwatch(PrintMode print_mode = human, const std::string &format = std::string())
+    Stopwatch(print_mode_t print_mode = human, const std::string &format = std::string())
         : _last_time_point(clock_type_t::now()),
           _total_duration(Duration::zero(), print_mode, format),
           _partials(),
@@ -31,7 +31,7 @@ public:
         // Nothing to do.
     }
 
-    inline void set_print_mode(PrintMode print_mode)
+    inline void set_print_mode(print_mode_t print_mode)
     {
         _print_mode = print_mode;
         _total_duration.set_print_mode(print_mode);
@@ -124,7 +124,7 @@ private:
     time_point_type_t _last_time_point;
     Duration _total_duration;
     std::vector<Duration> _partials;
-    PrintMode _print_mode;
+    print_mode_t _print_mode;
     std::string _format;
 };
 
