@@ -1,6 +1,10 @@
-/// @file stopwatch.hpp
+/// @file timespec.hpp
 /// @author Enrico Fraccaroli (enry.frak@gmail.com)
-/// @brief Benchmarking classes.
+/// @brief Defines the timespec_t class, which extends the timespec structure.
+/// 
+/// @copyright (c) 2024 This file is distributed under the MIT License.
+/// See LICENSE.md for details.
+/// 
 
 #pragma once
 
