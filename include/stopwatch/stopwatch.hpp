@@ -4,266 +4,18 @@
 
 #pragma once
 
-#include <iostream>
-#include <utility>
-#include <iomanip>
-#include <vector>
-#include <sstream>
+#include "stopwatch/duration.hpp"
 
-#if __cplusplus < 201103L
-#include "timespec_support.hpp"
-#else
-#include <chrono>
-#endif
+#include <vector>
 
 namespace stopwatch
 {
 
-#if __cplusplus < 201103L
-typedef timespec_t clock_type_t;
-typedef timespec_t time_point_type_t;
-typedef timespec_t duration_type_t;
-typedef timespec_t elapsed_time_t;
-#else
-typedef std::chrono::high_resolution_clock clock_type_t;
-typedef std::chrono::high_resolution_clock::time_point time_point_type_t;
-typedef std::chrono::duration<double> duration_type_t;
-typedef std::chrono::nanoseconds elapsed_time_t;
-#endif
-
-/// @brief The way the stopwatch prints the elapsed time.
-enum PrintMode {
-    human,   ///< Human readable   :  1h  4m  2s   1m 153u 399n
-    numeric, ///< Numeric          :  1.4.2.1.153.399
-    total,   ///< Total elapsed    :
-    custom   ///< Use placeholders : %H,%M,%s,%m,%u,%n
-};
-
-class Duration {
-public:
-    Duration(duration_type_t duration, PrintMode print_mode, const std::string &format)
-        : _duration(duration),
-          _print_mode(print_mode),
-          _format(format)
-    {
-        // Nothing to do.
-    }
-
-    static inline duration_type_t zero()
-    {
-        return duration_type_t::zero();
-    }
-
-    inline double count() const
-    {
-        return _duration.count();
-    }
-
-    inline double operator()() const
-    {
-        return _duration.count();
-    }
-
-    inline void set_print_mode(PrintMode print_mode)
-    {
-        _print_mode = print_mode;
-    }
-
-    inline void set_format(const std::string &format)
-    {
-        _format = format;
-    }
-
-    inline Duration operator+(const Duration &rhs) const
-    {
-        return Duration(_duration + rhs._duration, _print_mode, _format);
-    }
-
-    template <typename T>
-    inline Duration operator+(const T &rhs) const
-    {
-        return Duration(_duration + rhs, _print_mode, _format);
-    }
-
-    inline Duration operator-(const Duration &rhs) const
-    {
-        return Duration(_duration - rhs._duration, _print_mode, _format);
-    }
-
-    template <typename T>
-    inline Duration operator-(const T &rhs) const
-    {
-        return Duration(_duration - rhs, _print_mode, _format);
-    }
-
-    template <typename T>
-    inline Duration operator/(const Duration &rhs) const
-    {
-        return Duration(duration_type_t(_duration / rhs._duration), _print_mode, _format);
-    }
-
-    template <typename T>
-    inline Duration operator/(const T &rhs) const
-    {
-        return Duration(_duration / rhs, _print_mode, _format);
-    }
-
-    inline Duration &operator+=(const Duration &rhs)
-    {
-        _duration = _duration + rhs._duration;
-        return *this;
-    }
-
-    template <typename T>
-    inline Duration &operator+=(const T &rhs)
-    {
-        _duration = _duration + rhs;
-        return *this;
-    }
-
-    inline Duration &operator-=(const Duration &rhs)
-    {
-        _duration = _duration - rhs._duration;
-        return *this;
-    }
-
-    template <typename T>
-    inline Duration &operator-=(const T &rhs)
-    {
-        _duration = _duration - rhs;
-        return *this;
-    }
-
-    template <typename T>
-    inline Duration &operator/=(const Duration &rhs)
-    {
-        _duration = duration_type_t(_duration / rhs._duration);
-        return *this;
-    }
-
-    template <typename T>
-    inline Duration &operator/=(const T &rhs)
-    {
-        _duration = _duration / rhs;
-        return *this;
-    }
-
-    inline Duration &operator=(const duration_type_t &rhs)
-    {
-        _duration = rhs;
-        return *this;
-    }
-
-    inline std::string to_string() const
-    {
-        std::stringstream ss;
-        if (_print_mode == total) {
-#if __cplusplus < 201103L
-            ss << _duration.to_nanoseconds<double>() * 1e-09;
-#else
-            ss << (static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(_duration).count()) * 1e-09);
-#endif
-        } else {
-#if __cplusplus < 201103L
-            time_t h, m, s, ms, us, ns = _duration.to_nanoseconds<time_t>();
-            // Extract the values.
-            h  = detail::ns_to_hours(ns, &ns);
-            m  = detail::ns_to_minutes(ns, &ns);
-            s  = detail::ns_to_seconds(ns, &ns);
-            ms = detail::ns_to_milliseconds(ns, &ns);
-            us = detail::ns_to_microseconds(ns, &ns);
-#else
-            duration_type_t duration = _duration;
-            // Extract the values.
-            time_t h = std::chrono::duration_cast<std::chrono::hours>(duration).count();
-            duration -= std::chrono::duration_cast<std::chrono::hours>(duration);
-            time_t m = std::chrono::duration_cast<std::chrono::minutes>(duration).count();
-            duration -= std::chrono::duration_cast<std::chrono::minutes>(duration);
-            time_t s = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
-            duration -= std::chrono::duration_cast<std::chrono::seconds>(duration);
-            time_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-            duration -= std::chrono::duration_cast<std::chrono::milliseconds>(duration);
-            time_t us = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-            duration -= std::chrono::duration_cast<std::chrono::microseconds>(duration);
-            time_t ns = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
-#endif
-            if (_print_mode == human) {
-                if (h)
-                    ss << std::setw(3) << h << "H ";
-                if (m)
-                    ss << std::setw(3) << m << "M ";
-                if (s)
-                    ss << std::setw(3) << s << "s ";
-                if (ms)
-                    ss << std::setw(3) << ms << "m ";
-                if (us)
-                    ss << std::setw(3) << us << "u ";
-                if (ns)
-                    ss << std::setw(3) << ns << "n ";
-            } else if (_print_mode == numeric) {
-                ss << h << "." << m << "." << s << "." << ms << "." << us << "." << ns;
-            } else if (!_format.empty()) {
-                std::string output = _format;
-                replace(output, "%H", to_string(h));
-                replace(output, "%M", to_string(m));
-                replace(output, "%s", to_string(s));
-                replace(output, "%m", to_string(ms));
-                replace(output, "%u", to_string(us));
-                replace(output, "%n", to_string(ns));
-                ss << output;
-            }
-        }
-        return ss.str();
-    }
-
-    friend std::ostream &operator<<(std::ostream &lhs, const Duration &rhs)
-    {
-        lhs << rhs.to_string();
-        return lhs;
-    }
-
-private:
-    /// @brief Replaces all occurences of the given substring.
-    /// @param s the input string.
-    /// @param substring the substring that should be replaced.
-    /// @param substitute the substitute.
-    /// @param occurences how many occurences should we replace (-1 = all of them).
-    /// @return a reference to the modified string.
-    static inline std::string &replace(std::string &s, const std::string &substring, const std::string &substitute, int occurences = -1)
-    {
-        // Find the first occurence.
-        std::string::size_type pos = s.find(substring);
-        // Iterate until the end of the string.
-        while (pos != std::string::npos) {
-            // Replace the occurence.
-            s.replace(pos, substring.size(), substitute);
-            // Check how many of them we still need to replace.
-            if ((occurences > 0) && ((--occurences) == 0))
-                break;
-            // Advance to the next occurence.
-            pos = s.find(substring, pos + substitute.size());
-        }
-        return s;
-    }
-
-    /// @brief Transforms the given value into a string.
-    /// @param value the value to transform.
-    /// @return the string representation of the value.
-    template <typename T>
-    static inline std::string to_string(const T &value)
-    {
-        std::stringstream ss;
-        ss << value;
-        return ss.str();
-    }
-
-    duration_type_t _duration;
-    PrintMode _print_mode;
-    std::string _format;
-};
-
 class Stopwatch {
 public:
+    /// @brief Constructs a Stopwatch object.
+    /// @param print_mode The mode for printing durations (default is human-readable).
+    /// @param format The format to be used for printing (default is an empty string).
     Stopwatch(PrintMode print_mode = human, const std::string &format = std::string())
         : _last_time_point(clock_type_t::now()),
           _total_duration(Duration::zero(), print_mode, format),
@@ -274,6 +26,8 @@ public:
         // Nothing to do.
     }
 
+    /// @brief Sets the print mode for the Stopwatch.
+    /// @param print_mode The new print mode to set.
     inline void set_print_mode(PrintMode print_mode)
     {
         _print_mode = print_mode;
@@ -282,6 +36,8 @@ public:
             it->set_print_mode(print_mode);
     }
 
+    /// @brief Sets the format string for the Stopwatch.
+    /// @param format The format string to set.
     inline void set_format(const std::string &format)
     {
         _format = format;
@@ -290,6 +46,7 @@ public:
             it->set_format(format);
     }
 
+    /// @brief Resets the Stopwatch by clearing all rounds and restarting the timer.
     inline void reset()
     {
         // Reset the total duration.
@@ -300,11 +57,14 @@ public:
         this->start();
     }
 
+    /// @brief Starts or resumes the Stopwatch from the current time.
     inline void start()
     {
         _last_time_point = clock_type_t::now();
     }
 
+    /// @brief Records a round, calculates the time since the last round, and updates the total duration.
+    /// @return The Duration of the last round.
     inline Duration round()
     {
         time_point_type_t now  = clock_type_t::now();
@@ -316,6 +76,8 @@ public:
         return duration;
     }
 
+    /// @brief Returns the duration of the last recorded round.
+    /// @return The Duration of the last round.
     Duration last_round() const
     {
         if (_partials.empty())
@@ -323,26 +85,38 @@ public:
         return _partials.back();
     }
 
+    /// @brief Returns the total elapsed time since the Stopwatch was started.
+    /// @return The total Duration.
     Duration total() const
     {
         return _total_duration;
     }
 
+    /// @brief Calculates the average duration of all recorded rounds.
+    /// @return The mean Duration of the rounds.
     Duration mean() const
     {
         return _total_duration / _partials.size();
     }
 
+    /// @brief Returns all the partial durations (rounds) recorded by the Stopwatch.
+    /// @return A vector of Duration representing each round.
     inline std::vector<Duration> partials() const
     {
         return _partials;
     }
 
+    /// @brief Converts the Stopwatch's total duration to a string.
+    /// @return A string representation of the total duration.
     virtual std::string to_string() const
     {
         return _total_duration.to_string();
     }
 
+    /// @brief Accesses the Duration of a specific round by index.
+    /// @param position The index of the round.
+    /// @return A reference to the Duration of the round.
+    /// @throw std::out_of_range if the index is out of bounds.
     inline Duration &operator[](std::size_t position)
     {
         if (position < _partials.size())
@@ -350,6 +124,10 @@ public:
         throw std::out_of_range("Out of range of partial times.");
     }
 
+    /// @brief Accesses the Duration of a specific round by index (const version).
+    /// @param position The index of the round.
+    /// @return A const reference to the Duration of the round.
+    /// @throw std::out_of_range if the index is out of bounds.
     inline const Duration &operator[](std::size_t position) const
     {
         if (position < _partials.size())
@@ -357,6 +135,10 @@ public:
         throw std::out_of_range("Out of range of partial times.");
     }
 
+    /// @brief Prints the Stopwatch's total duration to an output stream.
+    /// @param lhs The output stream.
+    /// @param rhs The Stopwatch to print.
+    /// @return The modified output stream.
     friend std::ostream &operator<<(std::ostream &lhs, const Stopwatch &rhs)
     {
         lhs << rhs.to_string();
@@ -364,11 +146,16 @@ public:
     }
 
 private:
-    time_point_type_t _last_time_point;
-    Duration _total_duration;
-    std::vector<Duration> _partials;
-    PrintMode _print_mode;
-    std::string _format;
+    /// @brief The time point of the last round or start.
+    time_point_type_t _last_time_point;      
+    /// @brief The total duration since the Stopwatch started.
+    Duration _total_duration;                
+    /// @brief Stores all partial (round) durations.
+    std::vector<Duration> _partials;         
+    /// @brief The print mode (e.g., human-readable or numeric).
+    PrintMode _print_mode;                   
+    /// @brief The format string used for printing durations.
+    std::string _format;                     
 };
 
 /// @brief Runs the function and samples the elapsed time.

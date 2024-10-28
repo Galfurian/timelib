@@ -1,5 +1,6 @@
 #include "stopwatch/stopwatch.hpp"
 
+#include <iostream>
 #include <cstdlib>
 #include <vector>
 
