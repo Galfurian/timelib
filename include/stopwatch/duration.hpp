@@ -1,51 +1,25 @@
 /// @file duration.hpp
 /// @author Enrico Fraccaroli (enry.frak@gmail.com)
-/// @brief
+/// @brief Defines the duration class.
+///
+/// @copyright (c) 2024 This file is distributed under the MIT License.
+/// See LICENSE.md for details.
+///
 
 #pragma once
 
-#if __cplusplus < 201103L
-#include "timespec_support.hpp"
-#else
-#include <chrono>
-#endif
+#include "stopwatch/details.hpp"
 
-#include <string>
-#include <iomanip>
 #include <sstream>
-
+#include <iomanip>
+#include <string>
 
 namespace stopwatch
 {
 
-#if __cplusplus < 201103L
-typedef timespec_t clock_type_t;
-typedef timespec_t time_point_type_t;
-typedef timespec_t duration_type_t;
-typedef timespec_t elapsed_time_t;
-#else
-typedef std::chrono::high_resolution_clock clock_type_t;
-typedef std::chrono::high_resolution_clock::time_point time_point_type_t;
-typedef std::chrono::duration<double> duration_type_t;
-typedef std::chrono::nanoseconds elapsed_time_t;
-#endif
-
-/// @brief The way the stopwatch prints the elapsed time.
-enum PrintMode {
-    human,   ///< Human readable   :  1h  4m  2s   1m 153u 399n
-    numeric, ///< Numeric          :  1.4.2.1.153.399
-    total,   ///< Total elapsed    :
-    custom   ///< Use placeholders : %H,%M,%s,%m,%u,%n
-};
-
-/// @brief Duration class.
 class Duration {
 public:
-    /// @brief Constructs a Duration object.
-    /// @param duration The duration value.
-    /// @param print_mode The mode in which the duration will be printed.
-    /// @param format The format to be used for printing the duration.
-    Duration(duration_type_t duration, PrintMode print_mode, const std::string &format)
+    Duration(duration_type_t duration, print_mode_t print_mode, const std::string &format)
         : _duration(duration),
           _print_mode(print_mode),
           _format(format)
@@ -76,7 +50,7 @@ public:
 
     /// @brief Sets the print mode.
     /// @param print_mode The new print mode to set.
-    inline void set_print_mode(PrintMode print_mode)
+    inline void set_print_mode(print_mode_t print_mode)
     {
         _print_mode = print_mode;
     }
@@ -319,7 +293,7 @@ private:
     /// @brief Stores the duration value.
     duration_type_t _duration;
     /// @brief Specifies the print mode (e.g., human-readable, numeric).
-    PrintMode _print_mode;
+    print_mode_t _print_mode;
     /// @brief Format string used for custom printing.
     std::string _format;
 };

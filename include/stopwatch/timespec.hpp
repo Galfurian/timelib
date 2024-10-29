@@ -1,6 +1,10 @@
-/// @file stopwatch.hpp
+/// @file timespec.hpp
 /// @author Enrico Fraccaroli (enry.frak@gmail.com)
-/// @brief Benchmarking classes.
+/// @brief Defines the timespec_t class, which extends the timespec structure.
+///
+/// @copyright (c) 2024 This file is distributed under the MIT License.
+/// See LICENSE.md for details.
+///
 
 #pragma once
 
@@ -131,6 +135,7 @@ inline time_t ns_to_microseconds(time_t value, time_t *remainder = NULL)
 
 } // namespace detail
 
+/// @brief A wrapper class for the timespec.
 class timespec_t : public timespec {
 public:
     /// @brief Default constructor for timespec_t.
@@ -176,10 +181,10 @@ public:
     /// @return A timespec_t object representing zero time.
     static inline timespec_t zero()
     {
-        timespec_t duration;
-        duration.tv_sec  = 0;
-        duration.tv_nsec = 0;
-        return duration;
+        timespec_t ts;
+        ts.tv_sec  = 0;
+        ts.tv_nsec = 0;
+        return ts;
     }
 
     /// @brief Normalizes the timespec_t object.

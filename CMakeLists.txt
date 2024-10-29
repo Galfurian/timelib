@@ -53,9 +53,9 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 # Include header directories, and link libraries.
 target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
 
-# -----------------------------------------------------------------------------
+# =====================================
 # COMPILATION FLAGS
-# -----------------------------------------------------------------------------
+# =====================================
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Disable warnings that suggest using MSVC-specific safe functions
@@ -116,7 +116,7 @@ if(DOXYGEN_FOUND)
     # Record the options that describe how to populate the specified content.
     FetchContent_Declare(doxygenawesome
         GIT_REPOSITORY https://github.com/jothepro/doxygen-awesome-css
-        GIT_TAG df88fe4fdd97714fadfd3ef17de0b4401f804052 # v2.3.1
+        GIT_TAG 568f56cde6ac78b6dfcc14acd380b2e745c301ea # v2.3.4
     )
     # Retrieve the properties related to the content.
     FetchContent_MakeAvailable(doxygenawesome)
@@ -141,7 +141,9 @@ if(DOXYGEN_FOUND)
     doxygen_add_docs(
         ${PROJECT_NAME}_documentation
         ${PROJECT_SOURCE_DIR}/README.md
-        ${PROJECT_SOURCE_DIR}/include/stopwatch/timespec_support.hpp
+        ${PROJECT_SOURCE_DIR}/include/stopwatch/details.hpp
+        ${PROJECT_SOURCE_DIR}/include/stopwatch/duration.hpp
+        ${PROJECT_SOURCE_DIR}/include/stopwatch/timespec.hpp
         ${PROJECT_SOURCE_DIR}/include/stopwatch/stopwatch.hpp
     )
 endif()

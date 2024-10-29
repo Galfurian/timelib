@@ -1,6 +1,10 @@
 /// @file stopwatch.hpp
 /// @author Enrico Fraccaroli (enry.frak@gmail.com)
-/// @brief Benchmarking classes.
+/// @brief Defines the stopwatch class, used for benchmarking.
+///
+/// @copyright (c) 2024 This file is distributed under the MIT License.
+/// See LICENSE.md for details.
+///
 
 #pragma once
 
@@ -16,7 +20,7 @@ public:
     /// @brief Constructs a Stopwatch object.
     /// @param print_mode The mode for printing durations (default is human-readable).
     /// @param format The format to be used for printing (default is an empty string).
-    Stopwatch(PrintMode print_mode = human, const std::string &format = std::string())
+    Stopwatch(print_mode_t print_mode = human, const std::string &format = std::string())
         : _last_time_point(clock_type_t::now()),
           _total_duration(Duration::zero(), print_mode, format),
           _partials(),
@@ -28,7 +32,7 @@ public:
 
     /// @brief Sets the print mode for the Stopwatch.
     /// @param print_mode The new print mode to set.
-    inline void set_print_mode(PrintMode print_mode)
+    inline void set_print_mode(print_mode_t print_mode)
     {
         _print_mode = print_mode;
         _total_duration.set_print_mode(print_mode);
@@ -147,15 +151,15 @@ public:
 
 private:
     /// @brief The time point of the last round or start.
-    time_point_type_t _last_time_point;      
+    time_point_type_t _last_time_point;
     /// @brief The total duration since the Stopwatch started.
-    Duration _total_duration;                
+    Duration _total_duration;
     /// @brief Stores all partial (round) durations.
-    std::vector<Duration> _partials;         
+    std::vector<Duration> _partials;
     /// @brief The print mode (e.g., human-readable or numeric).
-    PrintMode _print_mode;                   
+    print_mode_t _print_mode;
     /// @brief The format string used for printing durations.
-    std::string _format;                     
+    std::string _format;
 };
 
 /// @brief Runs the function and samples the elapsed time.
