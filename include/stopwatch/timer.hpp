@@ -14,7 +14,7 @@ public:
     /// @brief Constructs a Timer object.
     /// @param print_mode The mode for printing the duration (default is human-readable).
     /// @param format The format to be used for printing (default is an empty string).
-    Timer(PrintMode print_mode = human, const std::string &format = std::string())
+    Timer(print_mode_t print_mode = human, const std::string &format = std::string())
         : _initial_time_point(clock_type_t::now()),
           _total_duration(Duration::zero(), print_mode, format),
           _print_mode(print_mode),
@@ -25,7 +25,7 @@ public:
 
     /// @brief Sets the print mode for the Timer.
     /// @param print_mode The new print mode to set.
-    inline void set_print_mode(PrintMode print_mode)
+    inline void set_print_mode(print_mode_t print_mode)
     {
         _print_mode = print_mode;
         _total_duration.set_print_mode(print_mode);
@@ -92,7 +92,7 @@ private:
     /// @brief The total elapsed duration.
     Duration _total_duration;
     /// @brief The print mode (e.g., human-readable or numeric).
-    PrintMode _print_mode;
+    print_mode_t _print_mode;
     /// @brief The format string used for printing.
     std::string _format;
 };
