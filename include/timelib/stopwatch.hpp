@@ -84,8 +84,9 @@ public:
     /// @return The Duration of the last round.
     Duration last_round() const
     {
-        if (_partials.empty())
+        if (_partials.empty()) {
             return Duration(clock_type_t::now() - _last_time_point, _print_mode, _format);
+        }
         return _partials.back();
     }
 
@@ -114,6 +115,9 @@ public:
     /// @return A string representation of the total duration.
     virtual std::string to_string() const
     {
+        if (_partials.empty()) {
+            return Duration(clock_type_t::now() - _last_time_point, _print_mode, _format).to_string();
+        }
         return _total_duration.to_string();
     }
 

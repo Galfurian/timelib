@@ -16,7 +16,6 @@ public:
     /// @param format The format to be used for printing (default is an empty string).
     Timer(print_mode_t print_mode = human, const std::string &format = std::string())
         : _initial_time_point(clock_type_t::now()),
-          _total_duration(Duration::zero(), print_mode, format),
           _print_mode(print_mode),
           _format(format)
     {
@@ -28,7 +27,6 @@ public:
     inline void set_print_mode(print_mode_t print_mode)
     {
         _print_mode = print_mode;
-        _total_duration.set_print_mode(print_mode);
     }
 
     /// @brief Sets the format string for the Timer.
@@ -36,14 +34,12 @@ public:
     inline void set_format(const std::string &format)
     {
         _format = format;
-        _total_duration.set_format(format);
     }
 
     /// @brief Resets the Timer, clearing the total duration and setting the
     /// start time to now.
     inline void reset()
     {
-        _total_duration     = duration_type_t::zero();
         _initial_time_point = clock_type_t::now();
     }
 
@@ -73,7 +69,7 @@ public:
     /// @return A string representation of the total duration.
     std::string to_string() const
     {
-        return _total_duration.to_string();
+        return this->elapsed().to_string();
     }
 
     /// @brief Prints the Timer's total duration to an output stream.
@@ -82,15 +78,13 @@ public:
     /// @return The modified output stream.
     friend std::ostream &operator<<(std::ostream &lhs, const Timer &rhs)
     {
-        lhs << rhs.to_string();
+        lhs << rhs.elapsed().to_string();
         return lhs;
     }
 
 private:
     /// @brief The starting time point of the Timer.
     time_point_type_t _initial_time_point;
-    /// @brief The total elapsed duration.
-    Duration _total_duration;
     /// @brief The print mode (e.g., human-readable or numeric).
     print_mode_t _print_mode;
     /// @brief The format string used for printing.
