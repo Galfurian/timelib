@@ -10,7 +10,8 @@
 
 #define _USE_32BIT_TIME_T
 
-#include <time.h>
+#include <ctime>
+#include <type_traits>
 
 namespace timelib
 {
@@ -155,21 +156,22 @@ public:
         tv_nsec = other.tv_nsec;
     }
 
-    /// @brief Constructor that initializes timespec_t from nanoseconds.
-    /// @param ns Nanoseconds to initialize from.
-    timespec_t(time_t ns)
+    /// @brief Constructor that initializes timespec_t from a floating-point or integral value.
+    /// @tparam T The type, which can be either floating-point or integral.
+    /// @param value The time value (seconds for floating-point or integral).
+    template <typename T>
+    timespec_t(T value)
         : timespec()
     {
-        tv_sec = detail::ns_to_seconds(ns, reinterpret_cast<time_t *>(&tv_nsec));
-        this->normalize();
-    }
-
-    /// @brief Constructor that initializes timespec_t from a double representing seconds.
-    /// @param seconds The time in seconds as a double.
-    timespec_t(double seconds)
-    {
-        tv_sec  = static_cast<time_t>(seconds);
-        tv_nsec = static_cast<long>((static_cast<double>(seconds) - static_cast<double>(tv_sec)) * 1e9);
+        if constexpr (std::is_floating_point<T>::value) {
+            // Handle floating-point values (expressed in seconds).
+            tv_sec  = static_cast<time_t>(value);
+            tv_nsec = static_cast<long>((static_cast<double>(value) - static_cast<double>(tv_sec)) * 1e9);
+        } else if constexpr (std::is_integral<T>::value) {
+            // Handle integral values (expressed in nanoseconds).
+            tv_sec  = static_cast<time_t>(static_cast<double>(value) / 1e9);
+            tv_nsec = static_cast<long>(value % static_cast<long>(1e9));
+        }
         this->normalize();
     }
 
@@ -278,83 +280,109 @@ public:
     }
 
     /// @brief Addition operator for two timespec_t objects.
-    /// @param lhs Left-hand operand.
-    /// @param rhs Right-hand operand.
-    /// @return A new timespec_t representing the sum of the two objects.
+    /// @param lhs Left-hand operand (a timespec_t object).
+    /// @param rhs Right-hand operand (a timespec_t object).
+    /// @return A new timespec_t representing the sum of the two timespec_t objects.
     inline friend timespec_t operator+(const timespec_t &lhs, const timespec_t &rhs)
     {
         return timespec_t(lhs.to_nanoseconds<time_t>() + rhs.to_nanoseconds<time_t>());
     }
 
-    /// @brief Addition operator for a timespec_t and a scalar.
-    /// @tparam T The scalar type.
-    /// @param lhs Left-hand operand.
-    /// @param rhs Right-hand scalar value.
-    /// @return A new timespec_t representing the sum.
+    /// @brief Addition operator for a timespec_t and a scalar (floating-point or integral).
+    /// @param lhs Left-hand operand (a timespec_t object).
+    /// @param rhs Right-hand scalar value representing time in seconds.
+    /// @return A new timespec_t representing the sum of the timespec_t and the scalar.
     template <typename T>
     inline friend timespec_t operator+(const timespec_t &lhs, const T &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<time_t>() + rhs);
+        return lhs + timespec_t(rhs);
+    }
+
+    /// @brief Addition operator for a scalar (floating-point or integral) and a timespec_t.
+    /// @param lhs Left-hand scalar value representing time in seconds.
+    /// @param rhs Right-hand operand (a timespec_t object).
+    /// @return A new timespec_t representing the sum of the scalar and the timespec_t.
+    template <typename T>
+    inline friend timespec_t operator+(const T &lhs, const timespec_t &rhs)
+    {
+        return timespec_t(lhs) + rhs;
     }
 
     /// @brief Subtraction operator for two timespec_t objects.
-    /// @param lhs Left-hand operand.
-    /// @param rhs Right-hand operand.
-    /// @return A new timespec_t representing the difference.
+    /// @param lhs Left-hand operand (a timespec_t object).
+    /// @param rhs Right-hand operand (a timespec_t object).
+    /// @return A new timespec_t representing the difference between the two timespec_t objects.
     inline friend timespec_t operator-(const timespec_t &lhs, const timespec_t &rhs)
     {
         return timespec_t(lhs.to_nanoseconds<time_t>() - rhs.to_nanoseconds<time_t>());
     }
 
-    /// @brief Subtraction operator for a timespec_t and a scalar.
-    /// @tparam T The scalar type.
-    /// @param lhs Left-hand operand.
-    /// @param rhs Right-hand scalar value.
-    /// @return A new timespec_t representing the difference.
+    /// @brief Subtraction operator for a timespec_t and a scalar (floating-point or integral).
+    /// @param lhs Left-hand operand (a timespec_t object).
+    /// @param rhs Right-hand scalar value representing time in seconds.
+    /// @return A new timespec_t representing the result of subtracting the scalar from the timespec_t.
     template <typename T>
     inline friend timespec_t operator-(const timespec_t &lhs, const T &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<time_t>() - rhs);
+        return lhs - timespec_t(rhs);
+    }
+
+    /// @brief Subtraction operator for a scalar (floating-point or integral) and a timespec_t.
+    /// @param lhs Left-hand scalar value representing time in seconds.
+    /// @param rhs Right-hand operand (a timespec_t object).
+    /// @return A new timespec_t representing the result of subtracting the timespec_t from the scalar.
+    template <typename T>
+    inline friend timespec_t operator-(const T &lhs, const timespec_t &rhs)
+    {
+        return timespec_t(lhs) - rhs;
     }
 
     /// @brief Multiplication operator for two timespec_t objects.
-    /// @param lhs Left-hand operand.
-    /// @param rhs Right-hand operand.
-    /// @return A new timespec_t representing the product.
+    /// @param lhs Left-hand operand (a timespec_t object).
+    /// @param rhs Right-hand operand (a timespec_t object).
+    /// @return A new timespec_t representing the product of the two timespec_t objects.
     inline friend timespec_t operator*(const timespec_t &lhs, const timespec_t &rhs)
     {
         return timespec_t(lhs.to_nanoseconds<time_t>() * rhs.to_nanoseconds<time_t>());
     }
 
-    /// @brief Multiplication operator for a timespec_t and a scalar.
-    /// @tparam T The scalar type.
-    /// @param lhs Left-hand operand.
-    /// @param rhs Right-hand scalar value.
-    /// @return A new timespec_t representing the product.
+    /// @brief Multiplication operator for a timespec_t and a scalar (floating-point or integral).
+    /// @param lhs Left-hand operand (a timespec_t object).
+    /// @param rhs Right-hand scalar value representing a multiplier.
+    /// @return A new timespec_t representing the scaled timespec_t.
     template <typename T>
     inline friend timespec_t operator*(const timespec_t &lhs, const T &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<time_t>() * rhs);
+        return lhs * timespec_t(rhs);
+    }
+
+    /// @brief Multiplication operator for a scalar (floating-point or integral) and a timespec_t.
+    /// @param lhs Left-hand scalar value representing a multiplier.
+    /// @param rhs Right-hand operand (a timespec_t object).
+    /// @return A new timespec_t representing the scaled timespec_t.
+    template <typename T>
+    inline friend timespec_t operator*(const T &lhs, const timespec_t &rhs)
+    {
+        return timespec_t(lhs) * rhs;
     }
 
     /// @brief Division operator for two timespec_t objects.
-    /// @param lhs Left-hand operand.
-    /// @param rhs Right-hand operand.
-    /// @return A new timespec_t representing the quotient.
+    /// @param lhs Left-hand operand (a timespec_t object).
+    /// @param rhs Right-hand operand (a timespec_t object).
+    /// @return A scalar value representing the division result.
     inline friend timespec_t operator/(const timespec_t &lhs, const timespec_t &rhs)
     {
         return timespec_t(lhs.to_nanoseconds<time_t>() / rhs.to_nanoseconds<time_t>());
     }
 
-    /// @brief Division operator for a timespec_t and a scalar.
-    /// @tparam T The scalar type.
-    /// @param lhs Left-hand operand.
-    /// @param rhs Right-hand scalar value.
-    /// @return A new timespec_t representing the quotient.
+    /// @brief Division operator for a timespec_t and a scalar (floating-point or integral).
+    /// @param lhs Left-hand operand (a timespec_t object).
+    /// @param rhs Right-hand scalar value representing the divisor.
+    /// @return A new timespec_t representing the scaled-down timespec_t.
     template <typename T>
     inline friend timespec_t operator/(const timespec_t &lhs, const T &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<time_t>() / static_cast<time_t>(rhs));
+        return lhs / timespec_t(rhs);
     }
 
     /// @brief Addition assignment operator for two timespec_t objects.
@@ -435,6 +463,198 @@ public:
     inline friend timespec_t &operator/=(timespec_t &lhs, const T &rhs)
     {
         return (lhs = lhs / rhs);
+    }
+
+    /// @brief Equality operator for two timespec_t objects.
+    /// @param lhs Left-hand operand.
+    /// @param rhs Right-hand operand.
+    /// @return True if both timespec_t objects are equal.
+    inline friend bool operator==(const timespec_t &lhs, const timespec_t &rhs)
+    {
+        return (lhs.tv_sec == rhs.tv_sec) && (lhs.tv_nsec == rhs.tv_nsec);
+    }
+
+    /// @brief Equality operator for timespec_t and a scalar.
+    /// @tparam T The scalar type.
+    /// @param lhs Left-hand timespec_t operand.
+    /// @param rhs Right-hand scalar operand.
+    /// @return True if timespec_t is equal to the scalar.
+    template <typename T>
+    inline friend bool operator==(const timespec_t &lhs, const T &rhs)
+    {
+        return lhs == timespec_t(rhs);
+    }
+
+    /// @brief Equality operator for a scalar and timespec_t.
+    /// @tparam T The scalar type.
+    /// @param lhs Left-hand scalar operand.
+    /// @param rhs Right-hand timespec_t operand.
+    /// @return True if the scalar is equal to timespec_t.
+    template <typename T>
+    inline friend bool operator==(const T &lhs, const timespec_t &rhs)
+    {
+        return timespec_t(lhs) == rhs;
+    }
+
+    /// @brief Inequality operator for two timespec_t objects.
+    /// @param lhs Left-hand operand.
+    /// @param rhs Right-hand operand.
+    /// @return True if both timespec_t objects are not equal.
+    inline friend bool operator!=(const timespec_t &lhs, const timespec_t &rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    /// @brief Inequality operator for timespec_t and a scalar.
+    /// @tparam T The scalar type.
+    /// @param lhs Left-hand timespec_t operand.
+    /// @param rhs Right-hand scalar operand.
+    /// @return True if timespec_t is not equal to the scalar.
+    template <typename T>
+    inline friend bool operator!=(const timespec_t &lhs, const T &rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    /// @brief Inequality operator for a scalar and timespec_t.
+    /// @tparam T The scalar type.
+    /// @param lhs Left-hand scalar operand.
+    /// @param rhs Right-hand timespec_t operand.
+    /// @return True if the scalar is not equal to timespec_t.
+    template <typename T>
+    inline friend bool operator!=(const T &lhs, const timespec_t &rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    /// @brief Less-than operator for two timespec_t objects.
+    /// @param lhs Left-hand operand.
+    /// @param rhs Right-hand operand.
+    /// @return True if lhs is less than rhs.
+    inline friend bool operator<(const timespec_t &lhs, const timespec_t &rhs)
+    {
+        if (lhs.tv_sec < rhs.tv_sec) {
+            return true;
+        }
+        if (lhs.tv_sec == rhs.tv_sec && lhs.tv_nsec < rhs.tv_nsec) {
+            return true;
+        }
+        return false;
+    }
+
+    /// @brief Less-than operator for timespec_t and a scalar.
+    /// @tparam T The scalar type.
+    /// @param lhs Left-hand timespec_t operand.
+    /// @param rhs Right-hand scalar operand.
+    /// @return True if lhs is less than the scalar.
+    template <typename T>
+    inline friend bool operator<(const timespec_t &lhs, const T &rhs)
+    {
+        return lhs < timespec_t(rhs);
+    }
+
+    /// @brief Less-than operator for a scalar and timespec_t.
+    /// @tparam T The scalar type.
+    /// @param lhs Left-hand scalar operand.
+    /// @param rhs Right-hand timespec_t operand.
+    /// @return True if the scalar is less than rhs.
+    template <typename T>
+    inline friend bool operator<(const T &lhs, const timespec_t &rhs)
+    {
+        return timespec_t(lhs) < rhs;
+    }
+
+    /// @brief Greater-than operator for two timespec_t objects.
+    /// @param lhs Left-hand operand.
+    /// @param rhs Right-hand operand.
+    /// @return True if lhs is greater than rhs.
+    inline friend bool operator>(const timespec_t &lhs, const timespec_t &rhs)
+    {
+        return rhs < lhs;
+    }
+
+    /// @brief Greater-than operator for timespec_t and a scalar.
+    /// @tparam T The scalar type.
+    /// @param lhs Left-hand timespec_t operand.
+    /// @param rhs Right-hand scalar operand.
+    /// @return True if lhs is greater than the scalar.
+    template <typename T>
+    inline friend bool operator>(const timespec_t &lhs, const T &rhs)
+    {
+        return timespec_t(rhs) < lhs;
+    }
+
+    /// @brief Greater-than operator for a scalar and timespec_t.
+    /// @tparam T The scalar type.
+    /// @param lhs Left-hand scalar operand.
+    /// @param rhs Right-hand timespec_t operand.
+    /// @return True if the scalar is greater than rhs.
+    template <typename T>
+    inline friend bool operator>(const T &lhs, const timespec_t &rhs)
+    {
+        return rhs < timespec_t(lhs);
+    }
+
+    /// @brief Less-than-or-equal-to operator for two timespec_t objects.
+    /// @param lhs Left-hand operand.
+    /// @param rhs Right-hand operand.
+    /// @return True if lhs is less than or equal to rhs.
+    inline friend bool operator<=(const timespec_t &lhs, const timespec_t &rhs)
+    {
+        return !(rhs < lhs);
+    }
+
+    /// @brief Less-than-or-equal-to operator for timespec_t and a scalar.
+    /// @tparam T The scalar type.
+    /// @param lhs Left-hand timespec_t operand.
+    /// @param rhs Right-hand scalar operand.
+    /// @return True if lhs is less than or equal to the scalar.
+    template <typename T>
+    inline friend bool operator<=(const timespec_t &lhs, const T &rhs)
+    {
+        return !(timespec_t(rhs) < lhs);
+    }
+
+    /// @brief Less-than-or-equal-to operator for a scalar and timespec_t.
+    /// @tparam T The scalar type.
+    /// @param lhs Left-hand scalar operand.
+    /// @param rhs Right-hand timespec_t operand.
+    /// @return True if the scalar is less than or equal to rhs.
+    template <typename T>
+    inline friend bool operator<=(const T &lhs, const timespec_t &rhs)
+    {
+        return !(rhs < timespec_t(lhs));
+    }
+
+    /// @brief Greater-than-or-equal-to operator for two timespec_t objects.
+    /// @param lhs Left-hand operand.
+    /// @param rhs Right-hand operand.
+    /// @return True if lhs is greater than or equal to rhs.
+    inline friend bool operator>=(const timespec_t &lhs, const timespec_t &rhs)
+    {
+        return !(lhs < rhs);
+    }
+
+    /// @brief Greater-than-or-equal-to operator for timespec_t and a scalar.
+    /// @tparam T The scalar type.
+    /// @param lhs Left-hand timespec_t operand.
+    /// @param rhs Right-hand scalar operand.
+    /// @return True if lhs is greater than or equal to the scalar.
+    template <typename T>
+    inline friend bool operator>=(const timespec_t &lhs, const T &rhs)
+    {
+        return !(lhs < timespec_t(rhs));
+    }
+
+    /// @brief Greater-than-or-equal-to operator for a scalar and timespec_t.
+    /// @tparam T The scalar type.
+    /// @param lhs Left-hand scalar operand.
+    /// @param rhs Right-hand timespec_t operand.
+    /// @return True if the scalar is greater than or equal to rhs.
+    template <typename T>
+    inline friend bool operator>=(const T &lhs, const timespec_t &rhs)
+    {
+        return !(timespec_t(lhs) < rhs);
     }
 
     /// @brief Assignment operator for timespec_t.

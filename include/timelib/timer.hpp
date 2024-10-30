@@ -15,11 +15,11 @@ public:
     /// @param print_mode The mode for printing the duration (default is human-readable).
     /// @param format The format to be used for printing (default is an empty string).
     /// @param timeout The target duration in seconds (default is 0, meaning no target).
-    Timer(print_mode_t print_mode = human, const std::string &format = std::string(), double timeout = 0)
+    Timer(print_mode_t print_mode = human, const std::string &format = std::string())
         : _initial_time_point(timespec_t::now()),
           _print_mode(print_mode),
           _format(format),
-          _timeout(timeout)
+          _timeout()
     {
         // Nothing to do.
     }
@@ -42,29 +42,28 @@ public:
     /// @param timeout The target duration in seconds.
     inline void set_timeout(double timeout)
     {
-        _timeout = timeout;
+        _timeout = timespec_t(timeout);
     }
 
     /// @brief Sets a new target duration for the Timer in nanoseconds.
-    /// @param nanoseconds The target duration in nanoseconds.
-    inline void set_timeout(time_t nanoseconds)
+    /// @param ns The target duration in nanoseconds.
+    inline void set_timeout(time_t ns)
     {
-        // Convert nanoseconds to seconds and set the _timeout.
-        _timeout = static_cast<double>(nanoseconds) / 1e9;
+        _timeout = timespec_t(ns);
     }
 
     /// @brief Sets a new target duration for the Timer based on a Duration object.
     /// @param duration The target duration as a Duration object.
     inline void set_timeout(const timespec_t &duration)
     {
-        _timeout = duration.count();
+        _timeout = duration;
     }
 
     /// @brief Sets a new target duration for the Timer based on a Duration object.
     /// @param duration The target duration as a Duration object.
     inline void set_timeout(const Duration &duration)
     {
-        _timeout = duration.count();
+        _timeout = duration.raw();
     }
 
     /// @brief Resets the Timer, clearing the total duration and setting the
@@ -100,7 +99,7 @@ public:
     /// @return The remaining Duration until the target is reached, or zero if the target is exceeded.
     inline Duration remaining() const
     {
-        double remaining_time = _timeout - this->elapsed().count();
+        double remaining_time = _timeout.count() - this->elapsed().count();
         // No remaining time if target is exceeded.
         if (remaining_time < 0) {
             remaining_time = 0;
@@ -112,6 +111,10 @@ public:
     /// @return True if the elapsed time exceeds the target duration, otherwise false.
     inline bool has_timeout() const
     {
+        // If we do not have a _timeout set, we do not perform the check.
+        if (_timeout == 0) {
+            return false;
+        }
         // Compare the elapsed time with the target duration.
         return this->elapsed().count() > _timeout;
     }
@@ -141,7 +144,7 @@ private:
     /// @brief The format string used for printing.
     std::string _format;
     /// @brief The target duration in seconds for the Timer.
-    double _timeout;
+    timespec_t _timeout;
 };
 
 } // namespace timelib
