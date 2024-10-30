@@ -164,23 +164,6 @@ public:
         this->normalize();
     }
 
-    /// @brief Constructor that initializes timespec_t from an int representing seconds.
-    /// @param seconds The number of seconds.
-    timespec_t(int seconds)
-    {
-        tv_sec  = static_cast<time_t>(seconds);
-        tv_nsec = 0;
-    }
-
-    /// @brief Constructor that initializes timespec_t from a float representing seconds.
-    /// @param seconds The time in seconds as a float.
-    timespec_t(float seconds)
-    {
-        tv_sec  = static_cast<time_t>(seconds);
-        tv_nsec = static_cast<long>((static_cast<float>(seconds) - static_cast<float>(tv_sec)) * 1e9f);
-        this->normalize();
-    }
-
     /// @brief Constructor that initializes timespec_t from a double representing seconds.
     /// @param seconds The time in seconds as a double.
     timespec_t(double seconds)

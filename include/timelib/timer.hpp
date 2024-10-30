@@ -45,6 +45,28 @@ public:
         _timeout = timeout;
     }
 
+    /// @brief Sets a new target duration for the Timer in nanoseconds.
+    /// @param nanoseconds The target duration in nanoseconds.
+    inline void set_timeout(time_t nanoseconds)
+    {
+        // Convert nanoseconds to seconds and set the _timeout.
+        _timeout = static_cast<double>(nanoseconds) / 1e9;
+    }
+
+    /// @brief Sets a new target duration for the Timer based on a Duration object.
+    /// @param duration The target duration as a Duration object.
+    inline void set_timeout(const duration_type_t &duration)
+    {
+        _timeout = duration.count();
+    }
+
+    /// @brief Sets a new target duration for the Timer based on a Duration object.
+    /// @param duration The target duration as a Duration object.
+    inline void set_timeout(const Duration &duration)
+    {
+        _timeout = duration.count();
+    }
+
     /// @brief Resets the Timer, clearing the total duration and setting the
     /// start time to now.
     inline void reset()
