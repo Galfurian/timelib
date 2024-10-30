@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "stopwatch/duration.hpp"
+#include "timelib/duration.hpp"
 
-namespace stopwatch
+namespace timelib
 {
 
 class Timer {
@@ -57,14 +57,14 @@ public:
     /// @return The elapsed Duration since the timer started.
     inline Duration stop()
     {
-        Duration elapsed = this->elapsed_total();
+        Duration elapsed = this->elapsed();
         this->reset();
         return elapsed;
     }
 
     /// @brief Returns the total elapsed time without resetting the Timer.
     /// @return The total elapsed Duration.
-    inline Duration elapsed_total() const
+    inline Duration elapsed() const
     {
         return Duration(clock_type_t::now() - _initial_time_point, _print_mode, _format);
     }
@@ -104,7 +104,7 @@ private:
 inline bool timer_has_elapsed(const Timer &timer, double target_duration)
 {
     // Compare the elapsed time with the target duration.
-    return timer.elapsed_total().count() > target_duration;
+    return timer.elapsed().count() > target_duration;
 }
 
-} // namespace stopwatch
+} // namespace timelib

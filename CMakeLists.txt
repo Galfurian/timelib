@@ -7,7 +7,7 @@
 cmake_minimum_required(VERSION 3.1...3.18)
 
 # Set the project name.
-project(stopwatch CXX)
+project(timelib CXX)
 
 # Set the default build type to Debug.
 if(NOT CMAKE_BUILD_TYPE)
@@ -104,6 +104,15 @@ if(BUILD_EXAMPLES)
     target_link_libraries(${PROJECT_NAME}_example_cpp98 PUBLIC ${PROJECT_NAME})
     # Set compiler flags.
     target_compile_features(${PROJECT_NAME}_example_cpp98 PUBLIC cxx_std_98)
+    
+    # Add the example.
+    add_executable(${PROJECT_NAME}_example_timer ${PROJECT_SOURCE_DIR}/examples/example_timer.cpp)
+    # Inlcude header directories.
+    target_include_directories(${PROJECT_NAME}_example_timer PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    # Set the linked libraries.
+    target_link_libraries(${PROJECT_NAME}_example_timer PUBLIC ${PROJECT_NAME})
+    # Set compiler flags.
+    target_compile_features(${PROJECT_NAME}_example_timer PUBLIC cxx_std_98)
 
 endif()
 
@@ -141,9 +150,9 @@ if(DOXYGEN_FOUND)
     doxygen_add_docs(
         ${PROJECT_NAME}_documentation
         ${PROJECT_SOURCE_DIR}/README.md
-        ${PROJECT_SOURCE_DIR}/include/stopwatch/details.hpp
-        ${PROJECT_SOURCE_DIR}/include/stopwatch/duration.hpp
-        ${PROJECT_SOURCE_DIR}/include/stopwatch/timespec.hpp
-        ${PROJECT_SOURCE_DIR}/include/stopwatch/stopwatch.hpp
+        ${PROJECT_SOURCE_DIR}/include/timelib/details.hpp
+        ${PROJECT_SOURCE_DIR}/include/timelib/duration.hpp
+        ${PROJECT_SOURCE_DIR}/include/timelib/timespec.hpp
+        ${PROJECT_SOURCE_DIR}/include/timelib/stopwatch.hpp
     )
 endif()

@@ -8,13 +8,13 @@
 
 #pragma once
 
-#include "stopwatch/details.hpp"
+#include "timelib/details.hpp"
 
 #include <sstream>
 #include <iomanip>
 #include <string>
 
-namespace stopwatch
+namespace timelib
 {
 
 class Duration {
@@ -298,4 +298,4 @@ private:
     std::string _format;
 };
 
-} // namespace stopwatch
+} // namespace timelib

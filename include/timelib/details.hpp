@@ -14,7 +14,7 @@
 #include <chrono>
 #endif
 
-namespace stopwatch
+namespace timelib
 {
 
 #if __cplusplus < 201103L
@@ -37,4 +37,4 @@ typedef enum {
     custom   ///< Use placeholders : %H,%M,%s,%m,%u,%n
 } print_mode_t;
 
-} // namespace stopwatch
+} // namespace timelib

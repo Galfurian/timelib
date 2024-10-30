@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include "stopwatch/duration.hpp"
+#include "timelib/duration.hpp"
 
 #include <vector>
 
-namespace stopwatch
+namespace timelib
 {
 
 class Stopwatch {
@@ -190,4 +190,4 @@ inline Stopwatch &ntimes(Stopwatch &stopwatch, const Function &function)
     return stopwatch;
 }
 
-} // namespace stopwatch
+} // namespace timelib

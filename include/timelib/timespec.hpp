@@ -12,7 +12,7 @@
 
 #include <time.h>
 
-namespace stopwatch
+namespace timelib
 {
 
 namespace detail
@@ -432,4 +432,4 @@ public:
     }
 };
 
-} // namespace stopwatch
+} // namespace timelib

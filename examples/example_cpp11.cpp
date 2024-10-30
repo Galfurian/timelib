@@ -6,12 +6,11 @@
 /// See LICENSE.md for details.
 /// 
 
-#include "stopwatch/stopwatch.hpp"
+#include "timelib/stopwatch.hpp"
 
 #include <vector>
 #include <random>
 #include <iostream>
-// #include <utility>
 
 inline std::vector<double> generate_random_values(unsigned size)
 {
@@ -40,49 +39,49 @@ inline double compute_mean(std::vector<double> &values)
 
 int main(int, char *[])
 {
-    stopwatch::Stopwatch sw;
+    timelib::Stopwatch sw;
     std::vector<double> values;
     const unsigned size = 10000;
     const unsigned runs = 1000;
 
-    stopwatch::time(sw, [&] { values = generate_random_values(size); });
+    timelib::time(sw, [&] { values = generate_random_values(size); });
 
-    sw.set_print_mode(stopwatch::human);
+    sw.set_print_mode(timelib::human);
     std::cout << "Generate : " << sw << "\n";
-    sw.set_print_mode(stopwatch::numeric);
+    sw.set_print_mode(timelib::numeric);
     std::cout << "Generate : " << sw << "\n";
-    sw.set_print_mode(stopwatch::total);
+    sw.set_print_mode(timelib::total);
     std::cout << "Generate : " << sw << "\n";
 
-    stopwatch::time(sw, [&] { values = compute_abs(values); });
+    timelib::time(sw, [&] { values = compute_abs(values); });
 
-    sw.set_print_mode(stopwatch::human);
+    sw.set_print_mode(timelib::human);
     std::cout << "Abs      : " << sw << "\n";
-    sw.set_print_mode(stopwatch::numeric);
+    sw.set_print_mode(timelib::numeric);
     std::cout << "Abs      : " << sw << "\n";
-    sw.set_print_mode(stopwatch::total);
+    sw.set_print_mode(timelib::total);
     std::cout << "Abs      : " << sw << "\n";
 
-    stopwatch::time(sw, [&] { compute_mean(values); });
+    timelib::time(sw, [&] { compute_mean(values); });
 
-    sw.set_print_mode(stopwatch::human);
+    sw.set_print_mode(timelib::human);
     std::cout << "Mean      : " << sw << "\n";
-    sw.set_print_mode(stopwatch::numeric);
+    sw.set_print_mode(timelib::numeric);
     std::cout << "Mean      : " << sw << "\n";
-    sw.set_print_mode(stopwatch::total);
+    sw.set_print_mode(timelib::total);
     std::cout << "Mean      : " << sw << "\n";
 
     std::cout << "\nMultiple runs:\n\n";
 
-    stopwatch::ntimes<runs>(sw, [&] { values = generate_random_values(size); });
+    timelib::ntimes<runs>(sw, [&] { values = generate_random_values(size); });
 
-    sw.set_print_mode(stopwatch::human);
+    sw.set_print_mode(timelib::human);
     std::cout << "Generate      : " << sw.mean() << "\n";
-    sw.set_print_mode(stopwatch::numeric);
+    sw.set_print_mode(timelib::numeric);
     std::cout << "Generate      : " << sw.mean() << "\n";
-    sw.set_print_mode(stopwatch::total);
+    sw.set_print_mode(timelib::total);
     std::cout << "Generate      : " << sw.mean() << "\n";
-    sw.set_print_mode(stopwatch::custom);
+    sw.set_print_mode(timelib::custom);
     sw.set_format("%H:%M:%s:%m:%u:%n");
     std::cout << "Generate      : " << sw.mean() << "\n";
 
