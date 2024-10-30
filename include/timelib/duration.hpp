@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "timelib/details.hpp"
+#include "timelib/timespec.hpp"
 
 #include <sstream>
 #include <iomanip>
@@ -17,10 +17,17 @@
 namespace timelib
 {
 
+/// @brief The way the stopwatch prints the elapsed time.
+typedef enum {
+    human,   ///< Human readable   :  1h  4m  2s   1m 153u 399n
+    numeric, ///< Numeric          :  1.4.2.1.153.399
+    total,   ///< Total elapsed    :
+    custom   ///< Use placeholders : %H,%M,%s,%m,%u,%n
+} print_mode_t;
+
 class Duration {
 public:
-
-    Duration(duration_type_t duration, print_mode_t print_mode, const std::string &format)
+    Duration(timespec_t duration, print_mode_t print_mode, const std::string &format)
         : _duration(duration),
           _print_mode(print_mode),
           _format(format)
@@ -30,9 +37,16 @@ public:
 
     /// @brief Returns a zero duration.
     /// @return A zero duration value.
-    static inline duration_type_t zero()
+    static inline timespec_t zero()
     {
-        return duration_type_t::zero();
+        return timespec_t::zero();
+    }
+
+    /// @brief Returns the internal duration as a timespec_t.
+    /// @return The timespec_t object representing the raw duration.
+    inline timespec_t raw() const
+    {
+        return _duration;
     }
 
     /// @brief Returns the duration count.
@@ -123,7 +137,7 @@ public:
     template <typename T>
     inline Duration operator/(const Duration &rhs) const
     {
-        return Duration(duration_type_t(_duration / rhs._duration), _print_mode, _format);
+        return Duration(timespec_t(_duration / rhs._duration), _print_mode, _format);
     }
 
     /// @brief Divides the Duration by a scalar value.
@@ -142,7 +156,7 @@ public:
     template <typename T>
     inline friend Duration operator/(const T &lhs, const Duration &rhs)
     {
-        return Duration(duration_type_t(lhs / rhs._duration), rhs._print_mode, rhs._format);
+        return Duration(timespec_t(lhs / rhs._duration), rhs._print_mode, rhs._format);
     }
 
     /// @brief Multiplies two Duration objects (optional, though uncommon).
@@ -216,7 +230,7 @@ public:
     template <typename T>
     inline Duration &operator/=(const Duration &rhs)
     {
-        _duration = duration_type_t(_duration / rhs._duration);
+        _duration = timespec_t(_duration / rhs._duration);
         return *this;
     }
 
@@ -233,7 +247,7 @@ public:
     /// @brief Assigns a new duration value.
     /// @param rhs The duration value to assign.
     /// @return A reference to the updated Duration.
-    inline Duration &operator=(const duration_type_t &rhs)
+    inline Duration &operator=(const timespec_t &rhs)
     {
         _duration = rhs;
         return *this;
@@ -335,7 +349,7 @@ private:
     }
 
     /// @brief Stores the duration value.
-    duration_type_t _duration;
+    timespec_t _duration;
     /// @brief Specifies the print mode (e.g., human-readable, numeric).
     print_mode_t _print_mode;
     /// @brief Format string used for custom printing.

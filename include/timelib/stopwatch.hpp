@@ -21,7 +21,7 @@ public:
     /// @param print_mode The mode for printing durations (default is human-readable).
     /// @param format The format to be used for printing (default is an empty string).
     Stopwatch(print_mode_t print_mode = human, const std::string &format = std::string())
-        : _last_time_point(clock_type_t::now()),
+        : _last_time_point(timespec_t::now()),
           _total_duration(Duration::zero(), print_mode, format),
           _partials(),
           _print_mode(print_mode),
@@ -54,7 +54,7 @@ public:
     inline void reset()
     {
         // Reset the total duration.
-        _total_duration = duration_type_t::zero();
+        _total_duration = timespec_t::zero();
         // Clear all the partials.
         _partials.clear();
         // Star again the timer.
@@ -64,15 +64,15 @@ public:
     /// @brief Starts or resumes the Stopwatch from the current time.
     inline void start()
     {
-        _last_time_point = clock_type_t::now();
+        _last_time_point = timespec_t::now();
     }
 
     /// @brief Records a round, calculates the time since the last round, and updates the total duration.
     /// @return The Duration of the last round.
     inline Duration round()
     {
-        time_point_type_t now  = clock_type_t::now();
-        elapsed_time_t elapsed = now - _last_time_point;
+        timespec_t now  = timespec_t::now();
+        timespec_t elapsed = now - _last_time_point;
         _last_time_point       = now;
         _total_duration += elapsed;
         Duration duration(elapsed, _print_mode, _format);
@@ -85,7 +85,7 @@ public:
     Duration last_round() const
     {
         if (_partials.empty()) {
-            return Duration(clock_type_t::now() - _last_time_point, _print_mode, _format);
+            return Duration(timespec_t::now() - _last_time_point, _print_mode, _format);
         }
         return _partials.back();
     }
@@ -116,7 +116,7 @@ public:
     virtual std::string to_string() const
     {
         if (_partials.empty()) {
-            return Duration(clock_type_t::now() - _last_time_point, _print_mode, _format).to_string();
+            return Duration(timespec_t::now() - _last_time_point, _print_mode, _format).to_string();
         }
         return _total_duration.to_string();
     }
@@ -155,7 +155,7 @@ public:
 
 private:
     /// @brief The time point of the last round or start.
-    time_point_type_t _last_time_point;
+    timespec_t _last_time_point;
     /// @brief The total duration since the Stopwatch started.
     Duration _total_duration;
     /// @brief Stores all partial (round) durations.

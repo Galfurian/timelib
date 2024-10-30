@@ -16,7 +16,7 @@ public:
     /// @param format The format to be used for printing (default is an empty string).
     /// @param timeout The target duration in seconds (default is 0, meaning no target).
     Timer(print_mode_t print_mode = human, const std::string &format = std::string(), double timeout = 0)
-        : _initial_time_point(clock_type_t::now()),
+        : _initial_time_point(timespec_t::now()),
           _print_mode(print_mode),
           _format(format),
           _timeout(timeout)
@@ -55,7 +55,7 @@ public:
 
     /// @brief Sets a new target duration for the Timer based on a Duration object.
     /// @param duration The target duration as a Duration object.
-    inline void set_timeout(const duration_type_t &duration)
+    inline void set_timeout(const timespec_t &duration)
     {
         _timeout = duration.count();
     }
@@ -71,13 +71,13 @@ public:
     /// start time to now.
     inline void reset()
     {
-        _initial_time_point = clock_type_t::now();
+        _initial_time_point = timespec_t::now();
     }
 
     /// @brief Starts the Timer by setting the initial time point to now.
     inline void start()
     {
-        _initial_time_point = clock_type_t::now();
+        _initial_time_point = timespec_t::now();
     }
 
     /// @brief Stops the Timer, resets it, and returns the elapsed duration.
@@ -93,7 +93,7 @@ public:
     /// @return The total elapsed Duration.
     inline Duration elapsed() const
     {
-        return Duration(clock_type_t::now() - _initial_time_point, _print_mode, _format);
+        return Duration(timespec_t::now() - _initial_time_point, _print_mode, _format);
     }
 
     /// @brief Returns the remaining time until the target duration is reached.
@@ -135,7 +135,7 @@ public:
 
 private:
     /// @brief The starting time point of the Timer.
-    time_point_type_t _initial_time_point;
+    timespec_t _initial_time_point;
     /// @brief The print mode (e.g., human-readable or numeric).
     print_mode_t _print_mode;
     /// @brief The format string used for printing.
