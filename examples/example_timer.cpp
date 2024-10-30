@@ -69,12 +69,14 @@ int main(int argc, char *argv[])
         // Create a Timer object.
         Timer timer;
 
+        timer.set_timeout(1.0);
+
         // Start the timer.
         timer.start();
         std::this_thread::sleep_for(std::chrono::milliseconds(1500)); // Simulate a 1.5-second task.
 
         // Check if the timer has exceeded 1 second.
-        if (timer_has_elapsed(timer, 1.0)) {
+        if (timer.has_timeout()) {
             std::cout << "More than 1 second has passed.\n";
         } else {
             std::cout << "Less than 1 second has passed.\n";

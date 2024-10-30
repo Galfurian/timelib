@@ -19,6 +19,15 @@ namespace timelib
 
 class Duration {
 public:
+    template <typename T>
+    Duration(T duration, print_mode_t print_mode, const std::string &format)
+        : _duration(duration_type_t(duration)),
+          _print_mode(print_mode),
+          _format(format)
+    {
+        // Nothing to do.
+    }
+
     Duration(duration_type_t duration, print_mode_t print_mode, const std::string &format)
         : _duration(duration),
           _print_mode(print_mode),
@@ -79,6 +88,16 @@ public:
         return Duration(_duration + rhs, _print_mode, _format);
     }
 
+    /// @brief Adds a scalar value of type T to a Duration object.
+    /// @param lhs The scalar value (left-hand side).
+    /// @param rhs The Duration object (right-hand side).
+    /// @return A new Duration object representing the sum.
+    template <typename T>
+    inline friend Duration operator+(const T &lhs, const Duration &rhs)
+    {
+        return Duration(lhs + rhs._duration, rhs._print_mode, rhs._format);
+    }
+
     /// @brief Subtracts two Duration objects.
     /// @param rhs The right-hand side Duration to subtract.
     /// @return A new Duration object representing the difference.
@@ -94,6 +113,16 @@ public:
     inline Duration operator-(const T &rhs) const
     {
         return Duration(_duration - rhs, _print_mode, _format);
+    }
+
+    /// @brief Subtracts a Duration object from a scalar value of type T.
+    /// @param lhs The scalar value (left-hand side).
+    /// @param rhs The Duration object (right-hand side).
+    /// @return A new Duration object representing the difference.
+    template <typename T>
+    inline friend Duration operator-(const T &lhs, const Duration &rhs)
+    {
+        return Duration(lhs - rhs._duration, rhs._print_mode, rhs._format);
     }
 
     /// @brief Divides two Duration objects.
@@ -112,6 +141,43 @@ public:
     inline Duration operator/(const T &rhs) const
     {
         return Duration(_duration / rhs, _print_mode, _format);
+    }
+
+    /// @brief Divides a scalar value of type T by a Duration object.
+    /// @param lhs The scalar value (left-hand side).
+    /// @param rhs The Duration object (right-hand side).
+    /// @return A new Duration object representing the quotient.
+    template <typename T>
+    inline friend Duration operator/(const T &lhs, const Duration &rhs)
+    {
+        return Duration(duration_type_t(lhs / rhs._duration), rhs._print_mode, rhs._format);
+    }
+
+    /// @brief Multiplies two Duration objects (optional, though uncommon).
+    /// @param rhs The right-hand side Duration object to multiply by.
+    /// @return A new Duration object representing the product.
+    inline Duration operator*(const Duration &rhs) const
+    {
+        return Duration(_duration * rhs._duration, _print_mode, _format);
+    }
+
+    /// @brief Multiplies the Duration object by a scalar value of type T.
+    /// @param rhs The scalar value to multiply by.
+    /// @return A new Duration object representing the product.
+    template <typename T>
+    inline Duration operator*(const T &rhs) const
+    {
+        return Duration(_duration * rhs, _print_mode, _format);
+    }
+
+    /// @brief Multiplies a scalar value of type T by a Duration object.
+    /// @param lhs The scalar value (left-hand side).
+    /// @param rhs The Duration object (right-hand side).
+    /// @return A new Duration object representing the product.
+    template <typename T>
+    inline friend Duration operator*(const T &lhs, const Duration &rhs)
+    {
+        return Duration(lhs * rhs._duration, rhs._print_mode, rhs._format);
     }
 
     /// @brief Adds another Duration to the current Duration.

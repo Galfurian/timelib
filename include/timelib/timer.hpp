@@ -14,10 +14,12 @@ public:
     /// @brief Constructs a Timer object.
     /// @param print_mode The mode for printing the duration (default is human-readable).
     /// @param format The format to be used for printing (default is an empty string).
-    Timer(print_mode_t print_mode = human, const std::string &format = std::string())
+    /// @param timeout The target duration in seconds (default is 0, meaning no target).
+    Timer(print_mode_t print_mode = human, const std::string &format = std::string(), double timeout = 0)
         : _initial_time_point(clock_type_t::now()),
           _print_mode(print_mode),
-          _format(format)
+          _format(format),
+          _timeout(timeout)
     {
         // Nothing to do.
     }
@@ -34,6 +36,13 @@ public:
     inline void set_format(const std::string &format)
     {
         _format = format;
+    }
+
+    /// @brief Sets a new target duration for the Timer.
+    /// @param timeout The target duration in seconds.
+    inline void set_timeout(double timeout)
+    {
+        _timeout = timeout;
     }
 
     /// @brief Resets the Timer, clearing the total duration and setting the
@@ -65,6 +74,26 @@ public:
         return Duration(clock_type_t::now() - _initial_time_point, _print_mode, _format);
     }
 
+    /// @brief Returns the remaining time until the target duration is reached.
+    /// @return The remaining Duration until the target is reached, or zero if the target is exceeded.
+    inline Duration remaining() const
+    {
+        double remaining_time = _timeout - this->elapsed().count();
+        // No remaining time if target is exceeded.
+        if (remaining_time < 0) {
+            remaining_time = 0;
+        }
+        return Duration(remaining_time, _print_mode, _format);
+    }
+
+    /// @brief Checks if the elapsed time of the Timer exceeds a given threshold in seconds.
+    /// @return True if the elapsed time exceeds the target duration, otherwise false.
+    inline bool has_timeout() const
+    {
+        // Compare the elapsed time with the target duration.
+        return this->elapsed().count() > _timeout;
+    }
+
     /// @brief Converts the Timer's total duration to a string.
     /// @return A string representation of the total duration.
     std::string to_string() const
@@ -89,16 +118,8 @@ private:
     print_mode_t _print_mode;
     /// @brief The format string used for printing.
     std::string _format;
+    /// @brief The target duration in seconds for the Timer.
+    double _timeout;
 };
-
-/// @brief Checks if the elapsed time of the Timer exceeds a given threshold in seconds.
-/// @param timer The Timer object to track the elapsed time.
-/// @param target_duration The target duration in seconds.
-/// @return True if the elapsed time exceeds the target duration, otherwise false.
-inline bool timer_has_elapsed(const Timer &timer, double target_duration)
-{
-    // Compare the elapsed time with the target duration.
-    return timer.elapsed().count() > target_duration;
-}
 
 } // namespace timelib
