@@ -164,6 +164,32 @@ public:
         this->normalize();
     }
 
+    /// @brief Constructor that initializes timespec_t from an int representing seconds.
+    /// @param seconds The number of seconds.
+    timespec_t(int seconds)
+    {
+        tv_sec  = static_cast<time_t>(seconds);
+        tv_nsec = 0;
+    }
+
+    /// @brief Constructor that initializes timespec_t from a float representing seconds.
+    /// @param seconds The time in seconds as a float.
+    timespec_t(float seconds)
+    {
+        tv_sec  = static_cast<time_t>(seconds);
+        tv_nsec = static_cast<long>((static_cast<float>(seconds) - static_cast<float>(tv_sec)) * 1e9f);
+        this->normalize();
+    }
+
+    /// @brief Constructor that initializes timespec_t from a double representing seconds.
+    /// @param seconds The time in seconds as a double.
+    timespec_t(double seconds)
+    {
+        tv_sec  = static_cast<time_t>(seconds);
+        tv_nsec = static_cast<long>((static_cast<double>(seconds) - static_cast<double>(tv_sec)) * 1e9);
+        this->normalize();
+    }
+
     /// @brief Returns the current time.
     /// @return A timespec_t object representing the current time.
     static inline timespec_t now()
@@ -205,6 +231,13 @@ public:
             tv_nsec = (detail::ns_per_second + tv_nsec);
         }
         return *this;
+    }
+
+    /// @brief Converts the timespec_t object to a double representing the time in seconds.
+    /// @return The equivalent value in seconds as a double.
+    inline double count() const
+    {
+        return static_cast<double>(tv_sec) + static_cast<double>(tv_nsec) / 1e9;
     }
 
     /// @brief Converts the timespec_t object to nanoseconds.

@@ -19,14 +19,6 @@ namespace timelib
 
 class Duration {
 public:
-    template <typename T>
-    Duration(T duration, print_mode_t print_mode, const std::string &format)
-        : _duration(duration_type_t(duration)),
-          _print_mode(print_mode),
-          _format(format)
-    {
-        // Nothing to do.
-    }
 
     Duration(duration_type_t duration, print_mode_t print_mode, const std::string &format)
         : _duration(duration),
@@ -253,13 +245,8 @@ public:
     {
         std::stringstream ss;
         if (_print_mode == total) {
-#if __cplusplus < 201103L
             ss << _duration.to_nanoseconds<double>() * 1e-09;
-#else
-            ss << (static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(_duration).count()) * 1e-09);
-#endif
         } else {
-#if __cplusplus < 201103L
             time_t h, m, s, ms, us, ns = _duration.to_nanoseconds<time_t>();
             // Extract the values.
             h  = detail::ns_to_hours(ns, &ns);
@@ -267,34 +254,25 @@ public:
             s  = detail::ns_to_seconds(ns, &ns);
             ms = detail::ns_to_milliseconds(ns, &ns);
             us = detail::ns_to_microseconds(ns, &ns);
-#else
-            duration_type_t duration = _duration;
-            // Extract the values.
-            time_t h = std::chrono::duration_cast<std::chrono::hours>(duration).count();
-            duration -= std::chrono::duration_cast<std::chrono::hours>(duration);
-            time_t m = std::chrono::duration_cast<std::chrono::minutes>(duration).count();
-            duration -= std::chrono::duration_cast<std::chrono::minutes>(duration);
-            time_t s = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
-            duration -= std::chrono::duration_cast<std::chrono::seconds>(duration);
-            time_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-            duration -= std::chrono::duration_cast<std::chrono::milliseconds>(duration);
-            time_t us = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-            duration -= std::chrono::duration_cast<std::chrono::microseconds>(duration);
-            time_t ns = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
-#endif
             if (_print_mode == human) {
-                if (h)
+                if (h) {
                     ss << std::setw(3) << h << "H ";
-                if (m)
+                }
+                if (m) {
                     ss << std::setw(3) << m << "M ";
-                if (s)
+                }
+                if (s) {
                     ss << std::setw(3) << s << "s ";
-                if (ms)
+                }
+                if (ms) {
                     ss << std::setw(3) << ms << "m ";
-                if (us)
+                }
+                if (us) {
                     ss << std::setw(3) << us << "u ";
-                if (ns)
+                }
+                if (ns) {
                     ss << std::setw(3) << ns << "n ";
+                }
             } else if (_print_mode == numeric) {
                 ss << h << "." << m << "." << s << "." << ms << "." << us << "." << ns;
             } else if (!_format.empty()) {

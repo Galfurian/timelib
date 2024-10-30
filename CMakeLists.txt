@@ -88,22 +88,11 @@ endif()
 if(BUILD_EXAMPLES)
 
     # Add the example.
-    add_executable(${PROJECT_NAME}_example_cpp11 ${PROJECT_SOURCE_DIR}/examples/example_cpp11.cpp)
+    add_executable(${PROJECT_NAME}_example_stopwatch ${PROJECT_SOURCE_DIR}/examples/example_stopwatch.cpp)
     # Inlcude header directories.
-    target_include_directories(${PROJECT_NAME}_example_cpp11 PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    target_include_directories(${PROJECT_NAME}_example_stopwatch PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Set the linked libraries.
-    target_link_libraries(${PROJECT_NAME}_example_cpp11 PUBLIC ${PROJECT_NAME})
-    # Set compiler flags.
-    target_compile_features(${PROJECT_NAME}_example_cpp11 PUBLIC cxx_std_11)
-    
-    # Add the example.
-    add_executable(${PROJECT_NAME}_example_cpp98 ${PROJECT_SOURCE_DIR}/examples/example_cpp98.cpp)
-    # Inlcude header directories.
-    target_include_directories(${PROJECT_NAME}_example_cpp98 PUBLIC ${PROJECT_SOURCE_DIR}/include)
-    # Set the linked libraries.
-    target_link_libraries(${PROJECT_NAME}_example_cpp98 PUBLIC ${PROJECT_NAME})
-    # Set compiler flags.
-    target_compile_features(${PROJECT_NAME}_example_cpp98 PUBLIC cxx_std_98)
+    target_link_libraries(${PROJECT_NAME}_example_stopwatch PUBLIC ${PROJECT_NAME})
     
     # Add the example.
     add_executable(${PROJECT_NAME}_example_timer ${PROJECT_SOURCE_DIR}/examples/example_timer.cpp)
@@ -111,8 +100,6 @@ if(BUILD_EXAMPLES)
     target_include_directories(${PROJECT_NAME}_example_timer PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Set the linked libraries.
     target_link_libraries(${PROJECT_NAME}_example_timer PUBLIC ${PROJECT_NAME})
-    # Set compiler flags.
-    target_compile_features(${PROJECT_NAME}_example_timer PUBLIC cxx_std_98)
 
 endif()
 

@@ -8,49 +8,15 @@
 
 #pragma once
 
-#if __cplusplus < 201103L
 #include "timespec.hpp"
-#else
-#include <chrono>
-#endif
 
 namespace timelib
 {
 
-#if __cplusplus < 201103L
 typedef timespec_t clock_type_t;      ///< The clock we use.
 typedef timespec_t time_point_type_t; ///< The type of time point.
 typedef timespec_t duration_type_t;   ///< How we store duration.
 typedef timespec_t elapsed_time_t;    ///< How we store the elapsed time.
-#else
-typedef std::chrono::high_resolution_clock clock_type_t;                  ///< The clock we use.
-typedef std::chrono::high_resolution_clock::time_point time_point_type_t; ///< The type of time point.
-typedef std::chrono::duration<double> duration_type_t;                    ///< How we store duration.
-typedef std::chrono::nanoseconds elapsed_time_t;                          ///< How we store the elapsed time.
-
-duration_type_t operator-(const duration_type_t &lhs, const duration_type_t &rhs)
-{
-    return duration_type_t(lhs.count() - rhs.count());
-}
-
-template <typename T>
-duration_type_t operator-(const T &lhs, const duration_type_t &rhs)
-{
-    return duration_type_t(lhs - rhs.count());
-}
-
-duration_type_t operator*(const duration_type_t &lhs, const duration_type_t &rhs)
-{
-    return duration_type_t(lhs.count() * rhs.count());
-}
-
-template <typename T>
-duration_type_t operator*(const T &lhs, const duration_type_t &rhs)
-{
-    return duration_type_t(lhs * rhs.count());
-}
-
-#endif
 
 /// @brief The way the stopwatch prints the elapsed time.
 typedef enum {

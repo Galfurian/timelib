@@ -1,10 +1,8 @@
-/// @file example_cpp11.cpp
+/// @file example_stopwatch.cpp
 /// @author Enrico Fraccaroli (enry.frak@gmail.com)
 /// @brief A couple of examples on how to use the class with C++11.
-/// 
 /// @copyright (c) 2024 This file is distributed under the MIT License.
 /// See LICENSE.md for details.
-/// 
 
 #include "timelib/stopwatch.hpp"
 
