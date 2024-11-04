@@ -48,10 +48,10 @@ find_package(Doxygen)
 # -----------------------------------------------------------------------------
 
 # Add the C++ library.
-add_library(${PROJECT_NAME} INTERFACE)
-add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+add_library(timelib INTERFACE)
+add_library(timelib::timelib ALIAS timelib)
 # Include header directories, and link libraries.
-target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(timelib INTERFACE ${PROJECT_SOURCE_DIR}/include)
 
 # =====================================
 # COMPILATION FLAGS
@@ -59,25 +59,25 @@ target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/inclu
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Disable warnings that suggest using MSVC-specific safe functions
-    target_compile_definitions(${PROJECT_NAME} INTERFACE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(timelib INTERFACE _CRT_SECURE_NO_WARNINGS)
     if(WARNINGS_AS_ERRORS)
-        target_compile_options(${PROJECT_NAME} INTERFACE /WX)
+        target_compile_options(timelib INTERFACE /WX)
     endif()
     if(STRICT_WARNINGS)
         # Mark system headers as external for MSVC explicitly
         # https://devblogs.microsoft.com/cppblog/broken-warnings-theory
-        target_compile_options(${PROJECT_NAME} INTERFACE /experimental:external)
-        target_compile_options(${PROJECT_NAME} INTERFACE /external:I ${CMAKE_BINARY_DIR})
-        target_compile_options(${PROJECT_NAME} INTERFACE /external:anglebrackets)
-        target_compile_options(${PROJECT_NAME} INTERFACE /external:W0)
-        target_compile_options(${PROJECT_NAME} INTERFACE /W4)
+        target_compile_options(timelib INTERFACE /experimental:external)
+        target_compile_options(timelib INTERFACE /external:I ${CMAKE_BINARY_DIR})
+        target_compile_options(timelib INTERFACE /external:anglebrackets)
+        target_compile_options(timelib INTERFACE /external:W0)
+        target_compile_options(timelib INTERFACE /W4)
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if(WARNINGS_AS_ERRORS)
-        target_compile_options(${PROJECT_NAME} INTERFACE -Werror)
+        target_compile_options(timelib INTERFACE -Werror)
     endif()
     if(STRICT_WARNINGS)
-        target_compile_options(${PROJECT_NAME} INTERFACE -Wall -Wextra -Wconversion -pedantic)
+        target_compile_options(timelib INTERFACE -Wall -Wextra -Wconversion -pedantic)
     endif()
 endif()
 
@@ -88,18 +88,22 @@ endif()
 if(BUILD_EXAMPLES)
 
     # Add the example.
-    add_executable(${PROJECT_NAME}_example_stopwatch ${PROJECT_SOURCE_DIR}/examples/example_stopwatch.cpp)
+    add_executable(timelib_example_stopwatch ${PROJECT_SOURCE_DIR}/examples/example_stopwatch.cpp)
+    # Specify C++11 standard for this target
+    set_target_properties(timelib_example_stopwatch PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
     # Inlcude header directories.
-    target_include_directories(${PROJECT_NAME}_example_stopwatch PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    target_include_directories(timelib_example_stopwatch PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Set the linked libraries.
-    target_link_libraries(${PROJECT_NAME}_example_stopwatch PUBLIC ${PROJECT_NAME})
+    target_link_libraries(timelib_example_stopwatch PUBLIC timelib)
     
     # Add the example.
-    add_executable(${PROJECT_NAME}_example_timer ${PROJECT_SOURCE_DIR}/examples/example_timer.cpp)
+    add_executable(timelib_example_timer ${PROJECT_SOURCE_DIR}/examples/example_timer.cpp)
+    # Specify C++11 standard for this target
+    set_target_properties(timelib_example_timer PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
     # Inlcude header directories.
-    target_include_directories(${PROJECT_NAME}_example_timer PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    target_include_directories(timelib_example_timer PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Set the linked libraries.
-    target_link_libraries(${PROJECT_NAME}_example_timer PUBLIC ${PROJECT_NAME})
+    target_link_libraries(timelib_example_timer PUBLIC timelib)
 
 endif()
 
@@ -123,7 +127,7 @@ if(DOXYGEN_FOUND)
     )
     # = CUSTOMIZATION =========================================================
     set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
-    set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
+    set(DOXYGEN_PROJECT_NAME timelib)
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${PROJECT_SOURCE_DIR}/README.md)
     set(DOXYGEN_SHOW_INCLUDE_FILES NO)
     set(DOXYGEN_GENERATE_TREEVIEW YES)
@@ -135,7 +139,7 @@ if(DOXYGEN_FOUND)
         ${doxygenawesome_SOURCE_DIR}/doxygen-awesome-darkmode-toggle.js
     )
     doxygen_add_docs(
-        ${PROJECT_NAME}_documentation
+        timelib_documentation
         ${PROJECT_SOURCE_DIR}/README.md
         ${PROJECT_SOURCE_DIR}/include/timelib/details.hpp
         ${PROJECT_SOURCE_DIR}/include/timelib/duration.hpp

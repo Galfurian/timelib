@@ -156,22 +156,27 @@ public:
         tv_nsec = other.tv_nsec;
     }
 
-    /// @brief Constructor that initializes timespec_t from a floating-point or integral value.
-    /// @tparam T The type, which can be either floating-point or integral.
-    /// @param value The time value (seconds for floating-point or integral).
-    template <typename T>
+    /// @brief Constructor that initializes timespec_t from a floating-point value.
+    /// @param value The time value in seconds (floating-point).
+    template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
     timespec_t(T value)
         : timespec()
     {
-        if constexpr (std::is_floating_point<T>::value) {
-            // Handle floating-point values (expressed in seconds).
-            tv_sec  = static_cast<time_t>(value);
-            tv_nsec = static_cast<long>((static_cast<double>(value) - static_cast<double>(tv_sec)) * 1e9);
-        } else if constexpr (std::is_integral<T>::value) {
-            // Handle integral values (expressed in nanoseconds).
-            tv_sec  = static_cast<time_t>(static_cast<double>(value) / 1e9);
-            tv_nsec = static_cast<long>(value % static_cast<long>(1e9));
-        }
+        // Handle floating-point values (expressed in seconds).
+        tv_sec  = static_cast<time_t>(value);
+        tv_nsec = static_cast<long>((static_cast<double>(value) - static_cast<double>(tv_sec)) * 1e9);
+        this->normalize();
+    }
+
+    /// @brief Constructor that initializes timespec_t from an integral value.
+    /// @param value The time value in nanoseconds (integral).
+    template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+    timespec_t(T value)
+        : timespec()
+    {
+        // Handle integral values (expressed in nanoseconds).
+        tv_sec  = static_cast<time_t>(static_cast<double>(value) / 1e9);
+        tv_nsec = static_cast<long>(value % static_cast<long>(1e9));
         this->normalize();
     }
 
