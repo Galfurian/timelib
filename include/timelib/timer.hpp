@@ -98,11 +98,11 @@ public:
     inline bool has_timeout() const
     {
         // If we do not have a _timeout set, we do not perform the check.
-        if (_timeout == timespec_t()) {
+        if (!_timeout) {
             return false;
         }
         // Compare the elapsed time with the target duration.
-        return this->elapsed().count() > _timeout;
+        return this->elapsed().raw() > _timeout;
     }
 
     /// @brief Converts the Timer's total duration to a string.
