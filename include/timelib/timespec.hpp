@@ -284,6 +284,12 @@ public:
         return static_cast<T>(detail::ns_to_hours(this->to_nanoseconds<T>()));
     }
 
+    /// @brief Conversion to bool to check if timespec_t represents a non-zero time.
+    explicit operator bool() const
+    {
+        return tv_sec != 0 || tv_nsec != 0;
+    }
+
     /// @brief Addition operator for two timespec_t objects.
     /// @param lhs Left-hand operand (a timespec_t object).
     /// @param rhs Right-hand operand (a timespec_t object).
