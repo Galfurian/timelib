@@ -144,9 +144,19 @@ public:
     /// @brief Default constructor for timespec_t.
     /// Initializes the timespec structure.
     timespec_t()
-        : timespec()
+        : timespec({ 0, 0 })
     {
         // No additional initialization needed.
+    }
+
+    /// @brief Constructor that accepts seconds and nanoseconds.
+    /// @param sec The seconds component.
+    /// @param nsec The nanoseconds component.
+    timespec_t(time_t sec, long nsec)
+        : timespec()
+    {
+        tv_sec  = sec;
+        tv_nsec = nsec;
     }
 
     /// @brief Copy constructor for timespec_t.

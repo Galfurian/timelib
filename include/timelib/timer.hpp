@@ -98,7 +98,7 @@ public:
     inline bool has_timeout() const
     {
         // If we do not have a _timeout set, we do not perform the check.
-        if (_timeout == 0.) {
+        if (_timeout == timespec_t()) {
             return false;
         }
         // Compare the elapsed time with the target duration.

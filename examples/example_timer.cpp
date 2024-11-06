@@ -31,7 +31,8 @@ int main(int argc, char *argv[])
 
         // Stop the timer and print the elapsed time.
         Duration elapsed_time = timer.stop();
-        std::cout << "Task completed in: " << elapsed_time.to_string() << "\n";
+        std::cout << "Task completed in : " << elapsed_time.to_string() << "\n";
+        std::cout << "Task has timeout  : " << timer.has_timeout() << "\n";
     }
 
     // Example 2: Timing multiple tasks with reset.
