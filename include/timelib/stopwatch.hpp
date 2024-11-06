@@ -71,9 +71,9 @@ public:
     /// @return The Duration of the last round.
     inline Duration round()
     {
-        timespec_t now  = timespec_t::now();
+        timespec_t now     = timespec_t::now();
         timespec_t elapsed = now - _last_time_point;
-        _last_time_point       = now;
+        _last_time_point   = now;
         _total_duration += elapsed;
         Duration duration(elapsed, _print_mode, _format);
         _partials.push_back(duration);
@@ -101,7 +101,7 @@ public:
     /// @return The mean Duration of the rounds.
     Duration mean() const
     {
-        return _total_duration / _partials.size();
+        return _total_duration / static_cast<double>(_partials.size());
     }
 
     /// @brief Returns all the partial durations (rounds) recorded by the Stopwatch.

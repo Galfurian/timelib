@@ -39,31 +39,17 @@ public:
     }
 
     /// @brief Sets a new target duration for the Timer.
-    /// @param timeout The target duration in seconds.
-    inline void set_timeout(double timeout)
+    /// @param value The target duration (float: seconds, integral: nanoseconds).
+    template <typename T>
+    inline void set_timeout(T value)
     {
-        _timeout = timespec_t(timeout);
+        _timeout = timespec_t(value);
     }
 
-    /// @brief Sets a new target duration for the Timer in nanoseconds.
-    /// @param ns The target duration in nanoseconds.
-    inline void set_timeout(time_t ns)
+    /// @brief Gets the target duration.
+    inline Duration get_timeout() const
     {
-        _timeout = timespec_t(ns);
-    }
-
-    /// @brief Sets a new target duration for the Timer based on a Duration object.
-    /// @param duration The target duration as a Duration object.
-    inline void set_timeout(const timespec_t &duration)
-    {
-        _timeout = duration;
-    }
-
-    /// @brief Sets a new target duration for the Timer based on a Duration object.
-    /// @param duration The target duration as a Duration object.
-    inline void set_timeout(const Duration &duration)
-    {
-        _timeout = duration.raw();
+        return Duration(_timeout, _print_mode, _format);
     }
 
     /// @brief Resets the Timer, clearing the total duration and setting the
@@ -112,7 +98,7 @@ public:
     inline bool has_timeout() const
     {
         // If we do not have a _timeout set, we do not perform the check.
-        if (_timeout == 0) {
+        if (_timeout == 0.) {
             return false;
         }
         // Compare the elapsed time with the target duration.

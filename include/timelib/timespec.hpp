@@ -10,8 +10,10 @@
 
 #define _USE_32BIT_TIME_T
 
-#include <ctime>
 #include <type_traits>
+#include <iostream>
+#include <iomanip>
+#include <ctime>
 
 namespace timelib
 {
@@ -168,18 +170,6 @@ public:
         this->normalize();
     }
 
-    /// @brief Constructor that initializes timespec_t from an integral value.
-    /// @param value The time value in nanoseconds (integral).
-    template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-    timespec_t(T value)
-        : timespec()
-    {
-        // Handle integral values (expressed in nanoseconds).
-        tv_sec  = static_cast<time_t>(static_cast<double>(value) / 1e9);
-        tv_nsec = static_cast<long>(value % static_cast<long>(1e9));
-        this->normalize();
-    }
-
     /// @brief Returns the current time.
     /// @return A timespec_t object representing the current time.
     static inline timespec_t now()
@@ -290,7 +280,7 @@ public:
     /// @return A new timespec_t representing the sum of the two timespec_t objects.
     inline friend timespec_t operator+(const timespec_t &lhs, const timespec_t &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<time_t>() + rhs.to_nanoseconds<time_t>());
+        return timespec_t(lhs.count() + rhs.count());
     }
 
     /// @brief Addition operator for a timespec_t and a scalar (floating-point or integral).
@@ -319,7 +309,7 @@ public:
     /// @return A new timespec_t representing the difference between the two timespec_t objects.
     inline friend timespec_t operator-(const timespec_t &lhs, const timespec_t &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<time_t>() - rhs.to_nanoseconds<time_t>());
+        return timespec_t(lhs.count() - rhs.count());
     }
 
     /// @brief Subtraction operator for a timespec_t and a scalar (floating-point or integral).
@@ -348,7 +338,7 @@ public:
     /// @return A new timespec_t representing the product of the two timespec_t objects.
     inline friend timespec_t operator*(const timespec_t &lhs, const timespec_t &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<time_t>() * rhs.to_nanoseconds<time_t>());
+        return timespec_t(lhs.count() * rhs.count());
     }
 
     /// @brief Multiplication operator for a timespec_t and a scalar (floating-point or integral).
@@ -377,7 +367,7 @@ public:
     /// @return A scalar value representing the division result.
     inline friend timespec_t operator/(const timespec_t &lhs, const timespec_t &rhs)
     {
-        return timespec_t(lhs.to_nanoseconds<time_t>() / rhs.to_nanoseconds<time_t>());
+        return timespec_t(lhs.count() / rhs.count());
     }
 
     /// @brief Division operator for a timespec_t and a scalar (floating-point or integral).
@@ -670,6 +660,16 @@ public:
         tv_sec  = other.tv_sec;
         tv_nsec = other.tv_nsec;
         return *this;
+    }
+
+    /// @brief Output stream operator to print timespec_t.
+    /// @param os The output stream.
+    /// @param ts The timespec_t instance.
+    /// @return Reference to the output stream.
+    friend std::ostream &operator<<(std::ostream &os, const timespec_t &ts)
+    {
+        os << "<s: " << ts.tv_sec << ", ns: " << ts.tv_nsec << ">";
+        return os;
     }
 };
 

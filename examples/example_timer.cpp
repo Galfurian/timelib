@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
         // Create a Timer object.
         Timer timer;
 
-        timer.set_timeout(1.0);
+        timer.set_timeout(1.25);
 
         // Start the timer.
         timer.start();
@@ -75,9 +75,9 @@ int main(int argc, char *argv[])
 
         // Check if the timer has exceeded 1 second.
         if (timer.has_timeout()) {
-            std::cout << "More than 1 second has passed.\n";
+            std::cout << "More than " << timer.get_timeout() << " second has passed.\n";
         } else {
-            std::cout << "Less than 1 second has passed.\n";
+            std::cout << "Less than " << timer.get_timeout() << " second has passed.\n";
         }
 
         // Print the actual elapsed time.
