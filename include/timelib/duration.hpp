@@ -19,10 +19,10 @@ namespace timelib
 
 /// @brief The way the stopwatch prints the elapsed time.
 typedef enum {
-    human,   ///< Human readable   :  1h  4m  2s   1m 153u 399n
-    numeric, ///< Numeric          :  1.4.2.1.153.399
-    total,   ///< Total elapsed    :
-    custom   ///< Use placeholders : %H,%M,%s,%m,%u,%n
+    human,   ///< Human readable     :  1h  4m  2s   1m 153u 399n
+    numeric, ///< Numeric            :  1.4.2.1.153.399
+    total,   ///< Elapsed in seconds : 1245.12
+    custom   ///< Use placeholders   : %H,%M,%s,%m,%u,%n
 } print_mode_t;
 
 class Duration {
@@ -291,12 +291,12 @@ public:
                 ss << h << "." << m << "." << s << "." << ms << "." << us << "." << ns;
             } else if (!_format.empty()) {
                 std::string output = _format;
-                replace(output, "%H", to_string(h));
-                replace(output, "%M", to_string(m));
-                replace(output, "%s", to_string(s));
-                replace(output, "%m", to_string(ms));
-                replace(output, "%u", to_string(us));
-                replace(output, "%n", to_string(ns));
+                this->replace(output, "%H", std::to_string(h));
+                this->replace(output, "%M", std::to_string(m));
+                this->replace(output, "%s", std::to_string(s));
+                this->replace(output, "%m", std::to_string(ms));
+                this->replace(output, "%u", std::to_string(us));
+                this->replace(output, "%n", std::to_string(ns));
                 ss << output;
             }
         }
@@ -309,8 +309,7 @@ public:
     /// @return The modified output stream.
     friend std::ostream &operator<<(std::ostream &lhs, const Duration &rhs)
     {
-        lhs << rhs.to_string();
-        return lhs;
+        return (lhs << rhs.to_string());
     }
 
 private:
@@ -335,17 +334,6 @@ private:
             pos = s.find(substring, pos + substitute.size());
         }
         return s;
-    }
-
-    /// @brief Transforms the given value into a string.
-    /// @param value the value to transform.
-    /// @return the string representation of the value.
-    template <typename T>
-    static inline std::string to_string(const T &value)
-    {
-        std::stringstream ss;
-        ss << value;
-        return ss.str();
     }
 
     /// @brief Stores the duration value.

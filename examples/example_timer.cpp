@@ -85,5 +85,53 @@ int main(int argc, char *argv[])
         std::cout << "Actual elapsed time: " << timer.elapsed().to_string() << "\n";
     }
 
+    // Example 4: Checking the pause funtionality.
+    {
+        std::cout << "\nExample 4: Checking the pause funtionality...\n";
+
+        // Create a Timer object.
+        Timer timer;
+
+        timer.set_timeout(2.00);
+
+        std::cout << "Setting the timeout to 1250 ms : " << timer.get_timeout().to_string() << "\n";
+        std::cout << "Elapsed time at the beginning  : " << timer.elapsed().to_string() << "\n";
+
+        // Start the timer.
+        timer.start();
+        // Sleep with the timer running.
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        // Pause the timer.
+        timer.pause();
+        std::cout << "Elapsed time after 500 ms      : " << timer.elapsed().to_string() << "\n";
+        // Sleep with the timer paused.
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        std::cout << "We slept for 1 s while paused  : " << timer.elapsed().to_string() << "\n";
+        // Start the timer.
+        timer.start();
+        // Sleep with the timer running.
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        // Pause the timer.
+        timer.pause();
+        std::cout << "Elapsed time after 500 ms      : " << timer.elapsed().to_string() << "\n";
+        // Sleep with the timer paused.
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        std::cout << "We slept for 1 s while paused  : " << timer.elapsed().to_string() << "\n";
+        // Start the timer.
+        timer.start();
+        // Sleep with the timer running.
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+        // Print the actual elapsed time.
+        std::cout << "Actual elapsed time            : " << timer.elapsed().to_string() << "\n";
+
+        // Check if the timer has exceeded 1 second.
+        if (timer.has_timeout()) {
+            std::cout << "More than " << timer.get_timeout() << " second has passed.\n";
+        } else {
+            std::cout << "Less than " << timer.get_timeout() << " second has passed.\n";
+        }
+    }
+
     return 0;
 }

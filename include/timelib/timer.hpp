@@ -19,7 +19,8 @@ public:
         : _initial_time_point(timespec_t::now()),
           _print_mode(print_mode),
           _format(format),
-          _timeout()
+          _accumulated(0.),
+          _timeout(0.)
     {
         // Nothing to do.
     }
@@ -57,6 +58,7 @@ public:
     inline void reset()
     {
         _initial_time_point = timespec_t::now();
+        _accumulated        = 0.;
     }
 
     /// @brief Starts the Timer by setting the initial time point to now.
@@ -69,23 +71,29 @@ public:
     /// @return The elapsed Duration since the timer started.
     inline Duration stop()
     {
-        Duration elapsed = this->elapsed();
+        timespec_t elapsed = this->raw_elapsed();
         this->reset();
-        return elapsed;
+        return Duration(elapsed, _print_mode, _format);
+    }
+
+    /// @brief Pausese the Timer.
+    inline void pause()
+    {
+        _accumulated = this->raw_elapsed();
     }
 
     /// @brief Returns the total elapsed time without resetting the Timer.
     /// @return The total elapsed Duration.
     inline Duration elapsed() const
     {
-        return Duration(timespec_t::now() - _initial_time_point, _print_mode, _format);
+        return Duration(this->raw_elapsed(), _print_mode, _format);
     }
 
     /// @brief Returns the remaining time until the target duration is reached.
     /// @return The remaining Duration until the target is reached, or zero if the target is exceeded.
     inline Duration remaining() const
     {
-        double remaining_time = _timeout.count() - this->elapsed().count();
+        double remaining_time = _timeout.count() - this->raw_elapsed().count();
         // No remaining time if target is exceeded.
         if (remaining_time < 0) {
             remaining_time = 0;
@@ -102,7 +110,7 @@ public:
             return false;
         }
         // Compare the elapsed time with the target duration.
-        return this->elapsed().raw() > _timeout;
+        return this->raw_elapsed() > _timeout;
     }
 
     /// @brief Converts the Timer's total duration to a string.
@@ -123,12 +131,21 @@ public:
     }
 
 private:
+    /// @brief Returns the total elapsed time without resetting the Timer.
+    /// @return The total elapsed Duration.
+    inline timespec_t raw_elapsed() const
+    {
+        return timespec_t::now() - _initial_time_point + _accumulated;
+    }
+
     /// @brief The starting time point of the Timer.
     timespec_t _initial_time_point;
     /// @brief The print mode (e.g., human-readable or numeric).
     print_mode_t _print_mode;
     /// @brief The format string used for printing.
     std::string _format;
+    /// @brief The accumulated time, in case we pause the timer.
+    timespec_t _accumulated;
     /// @brief The target duration in seconds for the Timer.
     timespec_t _timeout;
 };
