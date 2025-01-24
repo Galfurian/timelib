@@ -8,8 +8,6 @@
 
 #pragma once
 
-#define _USE_32BIT_TIME_T
-
 #include <type_traits>
 #include <iostream>
 #include <iomanip>
