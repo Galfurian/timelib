@@ -15,6 +15,7 @@
 namespace timelib
 {
 
+/// @brief A class that represents a stopwatch for benchmarking.
 class Stopwatch {
 public:
     /// @brief Constructs a Stopwatch object.
@@ -29,6 +30,8 @@ public:
     {
         // Nothing to do.
     }
+
+    virtual ~Stopwatch() = default;
 
     /// @brief Sets the print mode for the Stopwatch.
     /// @param print_mode The new print mode to set.

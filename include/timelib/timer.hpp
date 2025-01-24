@@ -9,12 +9,12 @@
 namespace timelib
 {
 
+/// @brief A class that represents a timer for benchmarking.
 class Timer {
 public:
     /// @brief Constructs a Timer object.
     /// @param print_mode The mode for printing the duration (default is human-readable).
     /// @param format The format to be used for printing (default is an empty string).
-    /// @param timeout The target duration in seconds (default is 0, meaning no target).
     Timer(print_mode_t print_mode = human, const std::string &format = std::string())
         : _initial_time_point(timespec_t::now()),
           _print_mode(print_mode),
@@ -48,6 +48,7 @@ public:
     }
 
     /// @brief Gets the target duration.
+    /// @return The target duration.
     inline Duration get_timeout() const
     {
         return Duration(_timeout, _print_mode, _format);

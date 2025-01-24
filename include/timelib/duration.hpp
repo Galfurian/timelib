@@ -25,8 +25,13 @@ typedef enum {
     custom   ///< Use placeholders   : %H,%M,%s,%m,%u,%n
 } print_mode_t;
 
+/// @brief A class that represents a duration of time.
 class Duration {
 public:
+    /// @brief Constructs a Duration object. 
+    /// @param duration the initial amount for the duration.
+    /// @param print_mode the way the duration should be printed.
+    /// @param format the format to be used for printing.
     Duration(timespec_t duration, print_mode_t print_mode, const std::string &format)
         : _duration(duration),
           _print_mode(print_mode),
