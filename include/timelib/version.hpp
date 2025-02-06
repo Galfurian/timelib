@@ -8,6 +8,8 @@
 
 #pragma once
 
-#define TIMELIB_MAJOR_VERSION 1 ///< Major version of the library.
-#define TIMELIB_MINOR_VERSION 1 ///< Minor version of the library.
-#define TIMELIB_MICRO_VERSION 0 ///< Micro version of the library.
+enum : unsigned char {
+    TIMELIB_MAJOR_VERSION = 1, ///< Major version of the library.
+    TIMELIB_MINOR_VERSION = 1, ///< Minor version of the library.
+    TIMELIB_MICRO_VERSION = 0  ///< Micro version of the library.
+};

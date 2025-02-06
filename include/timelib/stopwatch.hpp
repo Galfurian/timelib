@@ -25,37 +25,57 @@ public:
     Stopwatch(print_mode_t print_mode = human, const std::string &format = std::string())
         : _last_time_point(timespec_t::now())
         , _total_duration(Duration::zero(), print_mode, format)
-        , _partials()
         , _print_mode(print_mode)
         , _format(format)
     {
         // Nothing to do.
     }
 
+    /// @brief Copy constructor.
+    /// @param other The other entity to copy.
+    Stopwatch(const Stopwatch &other) = default;
+
+    /// @brief Copy assignment operator.
+    /// @param other The other entity to copy.
+    /// @return A reference to this object.
+    auto operator=(const Stopwatch &other) -> Stopwatch & = default;
+
+    /// @brief Move constructor.
+    /// @param other The other entity to move.
+    Stopwatch(Stopwatch &&other) noexcept = default;
+
+    /// @brief Move assignment operator.
+    /// @param other The other entity to move.
+    /// @return A reference to this object.
+    auto operator=(Stopwatch &&other) noexcept -> Stopwatch & = default;
+
+    /// @brief Virtual destructor.
     virtual ~Stopwatch() = default;
 
     /// @brief Sets the print mode for the Stopwatch.
     /// @param print_mode The new print mode to set.
-    inline void set_print_mode(print_mode_t print_mode)
+    void set_print_mode(print_mode_t print_mode)
     {
         _print_mode = print_mode;
         _total_duration.set_print_mode(print_mode);
-        for (std::vector<Duration>::iterator it = _partials.begin(); it != _partials.end(); ++it)
-            it->set_print_mode(print_mode);
+        for (auto &_partial : _partials) {
+            _partial.set_print_mode(print_mode);
+        }
     }
 
     /// @brief Sets the format string for the Stopwatch.
     /// @param format The format string to set.
-    inline void set_format(const std::string &format)
+    void set_format(const std::string &format)
     {
         _format = format;
         _total_duration.set_format(format);
-        for (std::vector<Duration>::iterator it = _partials.begin(); it != _partials.end(); ++it)
-            it->set_format(format);
+        for (auto &_partial : _partials) {
+            _partial.set_format(format);
+        }
     }
 
     /// @brief Resets the Stopwatch by clearing all rounds and restarting the timer.
-    inline void reset()
+    void reset()
     {
         // Reset the total duration.
         _total_duration = timespec_t::zero();
@@ -66,11 +86,11 @@ public:
     }
 
     /// @brief Starts or resumes the Stopwatch from the current time.
-    inline void start() { _last_time_point = timespec_t::now(); }
+    void start() { _last_time_point = timespec_t::now(); }
 
     /// @brief Records a round, calculates the time since the last round, and updates the total duration.
     /// @return The Duration of the last round.
-    inline Duration round()
+    auto round() -> Duration
     {
         timespec_t now     = timespec_t::now();
         timespec_t elapsed = now - _last_time_point;
@@ -83,7 +103,7 @@ public:
 
     /// @brief Returns the duration of the last recorded round.
     /// @return The Duration of the last round.
-    Duration last_round() const
+    auto last_round() const -> Duration
     {
         if (_partials.empty()) {
             return Duration(timespec_t::now() - _last_time_point, _print_mode, _format);
@@ -93,19 +113,19 @@ public:
 
     /// @brief Returns the total elapsed time since the Stopwatch was started.
     /// @return The total Duration.
-    Duration total() const { return _total_duration; }
+    auto total() const -> Duration { return _total_duration; }
 
     /// @brief Calculates the average duration of all recorded rounds.
     /// @return The mean Duration of the rounds.
-    Duration mean() const { return _total_duration / static_cast<double>(_partials.size()); }
+    auto mean() const -> Duration { return _total_duration / static_cast<double>(_partials.size()); }
 
     /// @brief Returns all the partial durations (rounds) recorded by the Stopwatch.
     /// @return A vector of Duration representing each round.
-    inline std::vector<Duration> partials() const { return _partials; }
+    auto partials() const -> std::vector<Duration> { return _partials; }
 
     /// @brief Converts the Stopwatch's total duration to a string.
     /// @return A string representation of the total duration.
-    virtual std::string to_string() const
+    virtual auto to_string() const -> std::string
     {
         if (_partials.empty()) {
             return Duration(timespec_t::now() - _last_time_point, _print_mode, _format).to_string();
@@ -117,10 +137,11 @@ public:
     /// @param position The index of the round.
     /// @return A reference to the Duration of the round.
     /// @throw std::out_of_range if the index is out of bounds.
-    inline Duration &operator[](std::size_t position)
+    auto operator[](std::size_t position) -> Duration &
     {
-        if (position < _partials.size())
+        if (position < _partials.size()) {
             return _partials[position];
+        }
         throw std::out_of_range("Out of range of partial times.");
     }
 
@@ -128,10 +149,11 @@ public:
     /// @param position The index of the round.
     /// @return A const reference to the Duration of the round.
     /// @throw std::out_of_range if the index is out of bounds.
-    inline const Duration &operator[](std::size_t position) const
+    auto operator[](std::size_t position) const -> const Duration &
     {
-        if (position < _partials.size())
+        if (position < _partials.size()) {
             return _partials[position];
+        }
         throw std::out_of_range("Out of range of partial times.");
     }
 
@@ -139,7 +161,7 @@ public:
     /// @param lhs The output stream.
     /// @param rhs The Stopwatch to print.
     /// @return The modified output stream.
-    friend std::ostream &operator<<(std::ostream &lhs, const Stopwatch &rhs)
+    friend auto operator<<(std::ostream &lhs, const Stopwatch &rhs) -> std::ostream &
     {
         lhs << rhs.to_string();
         return lhs;
@@ -163,11 +185,11 @@ private:
 /// @param function the function to sample.
 /// @return the same stopwatch passed as argument.
 template <class Function>
-inline Stopwatch &time(Stopwatch &stopwatch, const Function &function)
+inline auto time(Stopwatch &stopwatch, const Function &function) -> Stopwatch &
 {
     stopwatch.reset();
     function();
-    stopwatch.round();
+    (void)stopwatch.round();
     return stopwatch;
 }
 
@@ -176,12 +198,12 @@ inline Stopwatch &time(Stopwatch &stopwatch, const Function &function)
 /// @param function the function to sample.
 /// @return the same stopwatch passed as argument.
 template <std::size_t N, class Function>
-inline Stopwatch &ntimes(Stopwatch &stopwatch, const Function &function)
+inline auto ntimes(Stopwatch &stopwatch, const Function &function) -> Stopwatch &
 {
     stopwatch.reset();
-    for (std::size_t i = 0u; i < N; ++i) {
+    for (std::size_t i = 0U; i < N; ++i) {
         function();
-        stopwatch.round();
+        (void)stopwatch.round();
     }
     return stopwatch;
 }
