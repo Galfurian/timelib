@@ -235,7 +235,6 @@ public:
 
     /// @brief Normalizes the timespec_t object.
     /// Ensures that the nanoseconds field is within valid range.
-    /// @return A reference to the normalized timespec_t object.
     auto normalize() -> void
     {
         while (tv_nsec >= detail::ns_per_second) {
