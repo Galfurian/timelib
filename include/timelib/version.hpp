@@ -10,6 +10,6 @@
 
 enum : unsigned char {
     TIMELIB_MAJOR_VERSION = 1, ///< Major version of the library.
-    TIMELIB_MINOR_VERSION = 1, ///< Minor version of the library.
+    TIMELIB_MINOR_VERSION = 2, ///< Minor version of the library.
     TIMELIB_MICRO_VERSION = 0  ///< Micro version of the library.
 };
