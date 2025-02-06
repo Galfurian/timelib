@@ -8,10 +8,10 @@
 
 #pragma once
 
-#include <type_traits>
-#include <iostream>
-#include <iomanip>
 #include <ctime>
+#include <iomanip>
+#include <iostream>
+#include <type_traits>
 
 namespace timelib
 {
@@ -37,42 +37,27 @@ static const time_t ns_per_microsecond = 1000UL;
 /// @brief Converts hours to nanoseconds.
 /// @param value The number of hours.
 /// @return The equivalent value in nanoseconds.
-inline time_t hours_to_ns(time_t value)
-{
-    return value * ns_per_hour;
-}
+inline time_t hours_to_ns(time_t value) { return value * ns_per_hour; }
 
 /// @brief Converts minutes to nanoseconds.
 /// @param value The number of minutes.
 /// @return The equivalent value in nanoseconds.
-inline time_t minutes_to_ns(time_t value)
-{
-    return value * ns_per_minute;
-}
+inline time_t minutes_to_ns(time_t value) { return value * ns_per_minute; }
 
 /// @brief Converts seconds to nanoseconds.
 /// @param value The number of seconds.
 /// @return The equivalent value in nanoseconds.
-inline time_t seconds_to_ns(time_t value)
-{
-    return value * ns_per_second;
-}
+inline time_t seconds_to_ns(time_t value) { return value * ns_per_second; }
 
 /// @brief Converts milliseconds to nanoseconds.
 /// @param value The number of milliseconds.
 /// @return The equivalent value in nanoseconds.
-inline time_t milliseconds_to_ns(time_t value)
-{
-    return value * ns_per_millisecond;
-}
+inline time_t milliseconds_to_ns(time_t value) { return value * ns_per_millisecond; }
 
 /// @brief Converts microseconds to nanoseconds.
 /// @param value The number of microseconds.
 /// @return The equivalent value in nanoseconds.
-inline time_t microseconds_to_ns(time_t value)
-{
-    return value * ns_per_microsecond;
-}
+inline time_t microseconds_to_ns(time_t value) { return value * ns_per_microsecond; }
 
 /// @brief Converts nanoseconds to hours.
 /// @param value The number of nanoseconds.
@@ -137,12 +122,13 @@ inline time_t ns_to_microseconds(time_t value, time_t *remainder = NULL)
 } // namespace detail
 
 /// @brief A wrapper class for the timespec.
-class timespec_t : public timespec {
+class timespec_t : public timespec
+{
 public:
     /// @brief Default constructor for timespec_t.
     /// Initializes the timespec structure.
     timespec_t()
-        : timespec({ 0, 0 })
+        : timespec({0, 0})
     {
         // No additional initialization needed.
     }
@@ -223,10 +209,7 @@ public:
 
     /// @brief Converts the timespec_t object to a double representing the time in seconds.
     /// @return The equivalent value in seconds as a double.
-    inline double count() const
-    {
-        return static_cast<double>(tv_sec) + static_cast<double>(tv_nsec) / 1e9;
-    }
+    inline double count() const { return static_cast<double>(tv_sec) + static_cast<double>(tv_nsec) / 1e9; }
 
     /// @brief Converts the timespec_t object to nanoseconds.
     /// @tparam T The type to convert to (e.g., int, float).
@@ -283,10 +266,7 @@ public:
     }
 
     /// @brief Conversion to bool to check if timespec_t represents a non-zero time.
-    explicit operator bool() const
-    {
-        return tv_sec != 0 || tv_nsec != 0;
-    }
+    explicit operator bool() const { return tv_sec != 0 || tv_nsec != 0; }
 
     /// @brief Addition operator for two timespec_t objects.
     /// @param lhs Left-hand operand (a timespec_t object).
@@ -398,10 +378,7 @@ public:
     /// @param lhs Left-hand operand.
     /// @param rhs Right-hand operand.
     /// @return A reference to the updated timespec_t.
-    inline friend timespec_t &operator+=(timespec_t &lhs, const timespec_t &rhs)
-    {
-        return (lhs = lhs + rhs);
-    }
+    inline friend timespec_t &operator+=(timespec_t &lhs, const timespec_t &rhs) { return (lhs = lhs + rhs); }
 
     /// @brief Addition assignment operator for a timespec_t and a scalar.
     /// @tparam T The scalar type.
@@ -418,10 +395,7 @@ public:
     /// @param lhs Left-hand operand.
     /// @param rhs Right-hand operand.
     /// @return A reference to the updated timespec_t.
-    inline friend timespec_t &operator-=(timespec_t &lhs, const timespec_t &rhs)
-    {
-        return (lhs = lhs - rhs);
-    }
+    inline friend timespec_t &operator-=(timespec_t &lhs, const timespec_t &rhs) { return (lhs = lhs - rhs); }
 
     /// @brief Subtraction assignment operator for a timespec_t and a scalar.
     /// @tparam T The scalar type.
@@ -438,10 +412,7 @@ public:
     /// @param lhs Left-hand operand.
     /// @param rhs Right-hand operand.
     /// @return A reference to the updated timespec_t.
-    inline friend timespec_t &operator*=(timespec_t &lhs, const timespec_t &rhs)
-    {
-        return (lhs = lhs * rhs);
-    }
+    inline friend timespec_t &operator*=(timespec_t &lhs, const timespec_t &rhs) { return (lhs = lhs * rhs); }
 
     /// @brief Multiplication assignment operator for a timespec_t and a scalar.
     /// @tparam T The scalar type.
@@ -458,10 +429,7 @@ public:
     /// @param lhs Left-hand operand.
     /// @param rhs Right-hand operand.
     /// @return A reference to the updated timespec_t.
-    inline friend timespec_t &operator/=(timespec_t &lhs, const timespec_t &rhs)
-    {
-        return (lhs = lhs / rhs);
-    }
+    inline friend timespec_t &operator/=(timespec_t &lhs, const timespec_t &rhs) { return (lhs = lhs / rhs); }
 
     /// @brief Division assignment operator for a timespec_t and a scalar.
     /// @tparam T The scalar type.
@@ -509,10 +477,7 @@ public:
     /// @param lhs Left-hand operand.
     /// @param rhs Right-hand operand.
     /// @return True if both timespec_t objects are not equal.
-    inline friend bool operator!=(const timespec_t &lhs, const timespec_t &rhs)
-    {
-        return !(lhs == rhs);
-    }
+    inline friend bool operator!=(const timespec_t &lhs, const timespec_t &rhs) { return !(lhs == rhs); }
 
     /// @brief Inequality operator for timespec_t and a scalar.
     /// @tparam T The scalar type.
@@ -577,10 +542,7 @@ public:
     /// @param lhs Left-hand operand.
     /// @param rhs Right-hand operand.
     /// @return True if lhs is greater than rhs.
-    inline friend bool operator>(const timespec_t &lhs, const timespec_t &rhs)
-    {
-        return rhs < lhs;
-    }
+    inline friend bool operator>(const timespec_t &lhs, const timespec_t &rhs) { return rhs < lhs; }
 
     /// @brief Greater-than operator for timespec_t and a scalar.
     /// @tparam T The scalar type.
@@ -608,10 +570,7 @@ public:
     /// @param lhs Left-hand operand.
     /// @param rhs Right-hand operand.
     /// @return True if lhs is less than or equal to rhs.
-    inline friend bool operator<=(const timespec_t &lhs, const timespec_t &rhs)
-    {
-        return !(rhs < lhs);
-    }
+    inline friend bool operator<=(const timespec_t &lhs, const timespec_t &rhs) { return !(rhs < lhs); }
 
     /// @brief Less-than-or-equal-to operator for timespec_t and a scalar.
     /// @tparam T The scalar type.
@@ -639,10 +598,7 @@ public:
     /// @param lhs Left-hand operand.
     /// @param rhs Right-hand operand.
     /// @return True if lhs is greater than or equal to rhs.
-    inline friend bool operator>=(const timespec_t &lhs, const timespec_t &rhs)
-    {
-        return !(lhs < rhs);
-    }
+    inline friend bool operator>=(const timespec_t &lhs, const timespec_t &rhs) { return !(lhs < rhs); }
 
     /// @brief Greater-than-or-equal-to operator for timespec_t and a scalar.
     /// @tparam T The scalar type.

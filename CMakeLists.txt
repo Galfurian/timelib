@@ -21,7 +21,8 @@ endif()
 
 option(STRICT_WARNINGS "Enable strict compiler warnings" ON)
 option(WARNINGS_AS_ERRORS "Treat all warnings as errors" OFF)
-option(BUILD_EXAMPLES "Build examples" OFF)
+
+option(BUILD_EXAMPLES "Build examples" ON)
 
 # -----------------------------------------------------------------------------
 # ENABLE FETCH CONTENT
@@ -43,17 +44,19 @@ mark_as_advanced(FORCE
 
 find_package(Doxygen)
 
+find_program(CLANG_TIDY_EXE NAMES clang-tidy)
+
 # -----------------------------------------------------------------------------
 # LIBRARY
 # -----------------------------------------------------------------------------
 
 # Add the C++ library.
-add_library(timelib INTERFACE)
-add_library(timelib::timelib ALIAS timelib)
+add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 # Include header directories, and link libraries.
-target_include_directories(timelib INTERFACE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
 # Set compiler flags.
-target_compile_features(timelib INTERFACE cxx_std_11)
+target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_11)
 
 # =====================================
 # COMPILATION FLAGS
@@ -62,40 +65,40 @@ target_compile_features(timelib INTERFACE cxx_std_11)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Disable warnings for MSVC-specific "safe" functions like strcpy_s, etc.,
     # which are not portable and may clutter warning logs.
-    target_compile_definitions(timelib INTERFACE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(${PROJECT_NAME} INTERFACE _CRT_SECURE_NO_WARNINGS)
 
     # Disable warning C4702: unreachable code.
     add_compile_options(/wd4702)
 
     if(WARNINGS_AS_ERRORS)
         # Treat all warnings as errors to enforce stricter code quality.
-        target_compile_options(timelib INTERFACE /WX)
+        target_compile_options(${PROJECT_NAME} INTERFACE /WX)
     endif()
 
     if(STRICT_WARNINGS)
         # Enable external header management to suppress warnings in system and
         # external headers, making it easier to focus on project-specific issues.
-        target_compile_options(timelib INTERFACE /experimental:external)
-        target_compile_options(timelib INTERFACE /external:I ${CMAKE_BINARY_DIR})
-        target_compile_options(timelib INTERFACE /external:anglebrackets)
-        target_compile_options(timelib INTERFACE /external:W0)
+        target_compile_options(${PROJECT_NAME} INTERFACE /experimental:external)
+        target_compile_options(${PROJECT_NAME} INTERFACE /external:I ${CMAKE_BINARY_DIR})
+        target_compile_options(${PROJECT_NAME} INTERFACE /external:anglebrackets)
+        target_compile_options(${PROJECT_NAME} INTERFACE /external:W0)
 
         # Use a high warning level to catch as many potential issues as possible.
-        target_compile_options(timelib INTERFACE /W4)
+        target_compile_options(${PROJECT_NAME} INTERFACE /W4)
 
         # Enforce standards-compliant behavior to avoid relying on MSVC-specific extensions.
-        target_compile_options(timelib INTERFACE /permissive-)
+        target_compile_options(${PROJECT_NAME} INTERFACE /permissive-)
     endif()
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if(WARNINGS_AS_ERRORS)
         # Treat all warnings as errors to enforce stricter code quality.
-        target_compile_options(timelib INTERFACE -Werror)
+        target_compile_options(${PROJECT_NAME} INTERFACE -Werror)
     endif()
 
     if(STRICT_WARNINGS)
         # Enable a broad set of warnings to catch common and subtle issues:
-        target_compile_options(timelib INTERFACE
+        target_compile_options(${PROJECT_NAME} INTERFACE
             -Wall                # Enable most general-purpose warnings.
             -Wextra              # Enable extra warnings not included in -Wall.
             -Wconversion         # Warn about implicit type conversions that may lose data.
@@ -118,23 +121,55 @@ endif()
 if(BUILD_EXAMPLES)
 
     # Add the example.
-    add_executable(timelib_example_stopwatch ${PROJECT_SOURCE_DIR}/examples/example_stopwatch.cpp)
+    add_executable(${PROJECT_NAME}_example_stopwatch ${PROJECT_SOURCE_DIR}/examples/example_stopwatch.cpp)
     # Specify C++11 standard for this target
-    set_target_properties(timelib_example_stopwatch PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
+    set_target_properties(${PROJECT_NAME}_example_stopwatch PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
     # Inlcude header directories.
-    target_include_directories(timelib_example_stopwatch PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    target_include_directories(${PROJECT_NAME}_example_stopwatch PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Set the linked libraries.
-    target_link_libraries(timelib_example_stopwatch PUBLIC timelib)
+    target_link_libraries(${PROJECT_NAME}_example_stopwatch PUBLIC ${PROJECT_NAME})
     
     # Add the example.
-    add_executable(timelib_example_timer ${PROJECT_SOURCE_DIR}/examples/example_timer.cpp)
+    add_executable(${PROJECT_NAME}_example_timer ${PROJECT_SOURCE_DIR}/examples/example_timer.cpp)
     # Specify C++11 standard for this target
-    set_target_properties(timelib_example_timer PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
+    set_target_properties(${PROJECT_NAME}_example_timer PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
     # Inlcude header directories.
-    target_include_directories(timelib_example_timer PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    target_include_directories(${PROJECT_NAME}_example_timer PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Set the linked libraries.
-    target_link_libraries(timelib_example_timer PUBLIC timelib)
+    target_link_libraries(${PROJECT_NAME}_example_timer PUBLIC ${PROJECT_NAME})
 
+endif()
+
+# -----------------------------------------------------------------------------
+# CODE ANALYSIS
+# -----------------------------------------------------------------------------
+
+if(CLANG_TIDY_EXE)
+    file(GLOB_RECURSE PROJECT_HEADERS_AND_SOURCES
+        "${PROJECT_SOURCE_DIR}/include/**/*.hpp"
+        "${PROJECT_SOURCE_DIR}/include/**/*.hh"
+        "${PROJECT_SOURCE_DIR}/include/**/*.h"
+        "${PROJECT_SOURCE_DIR}/include/*.hpp"
+        "${PROJECT_SOURCE_DIR}/include/*.hh"
+        "${PROJECT_SOURCE_DIR}/include/*.h"
+    )
+    add_custom_target(
+        ${PROJECT_NAME}_clang_tidy
+        COMMAND ${CLANG_TIDY_EXE}
+        --p=${CMAKE_BINARY_DIR}
+        ${PROJECT_HEADERS_AND_SOURCES}
+        COMMENT "Running clang-tidy"
+        VERBATIM
+    )
+    add_custom_target(
+        ${PROJECT_NAME}_clang_tidy_fix
+        COMMAND ${CLANG_TIDY_EXE}
+        --fix --fix-errors
+        --p=${CMAKE_BINARY_DIR}
+        ${PROJECT_HEADERS_AND_SOURCES}
+        COMMENT "Running clang-tidy-fix"
+        VERBATIM
+    )
 endif()
 
 # -----------------------------------------------------------------------------
@@ -193,21 +228,22 @@ if(DOXYGEN_FOUND)
     set(DOXYGEN_WARN_AS_ERROR YES) # Treat warnings as errors for CI
 
     # Exclude certain files or directories from documentation (if needed)
-    set(DOXYGEN_EXCLUDE_PATTERNS
-        "${PROJECT_SOURCE_DIR}/tests/*"
-        "${PROJECT_SOURCE_DIR}/examples/*"
-    )
+    set(DOXYGEN_EXCLUDE_PATTERNS "${PROJECT_SOURCE_DIR}/tests/*" "${PROJECT_SOURCE_DIR}/examples/*")
 
-    # Add Doxygen documentation target
+    # Add Doxygen documentation target.
+    file(GLOB_RECURSE PROJECT_HEADERS_AND_SOURCES
+        "${PROJECT_SOURCE_DIR}/include/**/*.hpp"
+        "${PROJECT_SOURCE_DIR}/include/**/*.hh"
+        "${PROJECT_SOURCE_DIR}/include/**/*.h"
+        "${PROJECT_SOURCE_DIR}/include/*.hpp"
+        "${PROJECT_SOURCE_DIR}/include/*.hh"
+        "${PROJECT_SOURCE_DIR}/include/*.h"
+    )
     doxygen_add_docs(
         timelib_documentation
         ${PROJECT_SOURCE_DIR}/README.md
         ${PROJECT_SOURCE_DIR}/LICENSE.md
-        ${PROJECT_SOURCE_DIR}/include/timelib/duration.hpp
-        ${PROJECT_SOURCE_DIR}/include/timelib/stopwatch.hpp
-        ${PROJECT_SOURCE_DIR}/include/timelib/timer.hpp
-        ${PROJECT_SOURCE_DIR}/include/timelib/timespec.hpp
-        ${PROJECT_SOURCE_DIR}/include/timelib/version.hpp
-        COMMENT "Generating Doxygen documentation for the library"
+        ${PROJECT_HEADERS_AND_SOURCES}
+        COMMENT "Generating Doxygen documentation"
     )
 endif()

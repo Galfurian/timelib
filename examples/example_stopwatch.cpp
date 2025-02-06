@@ -6,9 +6,9 @@
 
 #include "timelib/stopwatch.hpp"
 
-#include <vector>
-#include <random>
 #include <iostream>
+#include <random>
+#include <vector>
 
 inline std::vector<double> generate_random_values(unsigned size)
 {

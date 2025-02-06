@@ -10,34 +10,29 @@ namespace timelib
 {
 
 /// @brief A class that represents a timer for benchmarking.
-class Timer {
+class Timer
+{
 public:
     /// @brief Constructs a Timer object.
     /// @param print_mode The mode for printing the duration (default is human-readable).
     /// @param format The format to be used for printing (default is an empty string).
     Timer(print_mode_t print_mode = human, const std::string &format = std::string())
-        : _initial_time_point(timespec_t::now()),
-          _print_mode(print_mode),
-          _format(format),
-          _accumulated(0.),
-          _timeout(0.)
+        : _initial_time_point(timespec_t::now())
+        , _print_mode(print_mode)
+        , _format(format)
+        , _accumulated(0.)
+        , _timeout(0.)
     {
         // Nothing to do.
     }
 
     /// @brief Sets the print mode for the Timer.
     /// @param print_mode The new print mode to set.
-    inline void set_print_mode(print_mode_t print_mode)
-    {
-        _print_mode = print_mode;
-    }
+    inline void set_print_mode(print_mode_t print_mode) { _print_mode = print_mode; }
 
     /// @brief Sets the format string for the Timer.
     /// @param format The format string to set.
-    inline void set_format(const std::string &format)
-    {
-        _format = format;
-    }
+    inline void set_format(const std::string &format) { _format = format; }
 
     /// @brief Sets a new target duration for the Timer.
     /// @param value The target duration (float: seconds, integral: nanoseconds).
@@ -49,10 +44,7 @@ public:
 
     /// @brief Gets the target duration.
     /// @return The target duration.
-    inline Duration get_timeout() const
-    {
-        return Duration(_timeout, _print_mode, _format);
-    }
+    inline Duration get_timeout() const { return Duration(_timeout, _print_mode, _format); }
 
     /// @brief Resets the Timer, clearing the total duration and setting the
     /// start time to now.
@@ -63,10 +55,7 @@ public:
     }
 
     /// @brief Starts the Timer by setting the initial time point to now.
-    inline void start()
-    {
-        _initial_time_point = timespec_t::now();
-    }
+    inline void start() { _initial_time_point = timespec_t::now(); }
 
     /// @brief Stops the Timer, resets it, and returns the elapsed duration.
     /// @return The elapsed Duration since the timer started.
@@ -78,17 +67,11 @@ public:
     }
 
     /// @brief Pausese the Timer.
-    inline void pause()
-    {
-        _accumulated = this->raw_elapsed();
-    }
+    inline void pause() { _accumulated = this->raw_elapsed(); }
 
     /// @brief Returns the total elapsed time without resetting the Timer.
     /// @return The total elapsed Duration.
-    inline Duration elapsed() const
-    {
-        return Duration(this->raw_elapsed(), _print_mode, _format);
-    }
+    inline Duration elapsed() const { return Duration(this->raw_elapsed(), _print_mode, _format); }
 
     /// @brief Returns the remaining time until the target duration is reached.
     /// @return The remaining Duration until the target is reached, or zero if the target is exceeded.
@@ -116,10 +99,7 @@ public:
 
     /// @brief Converts the Timer's total duration to a string.
     /// @return A string representation of the total duration.
-    std::string to_string() const
-    {
-        return this->elapsed().to_string();
-    }
+    std::string to_string() const { return this->elapsed().to_string(); }
 
     /// @brief Prints the Timer's total duration to an output stream.
     /// @param lhs The output stream.
@@ -134,10 +114,7 @@ public:
 private:
     /// @brief Returns the total elapsed time without resetting the Timer.
     /// @return The total elapsed Duration.
-    inline timespec_t raw_elapsed() const
-    {
-        return timespec_t::now() - _initial_time_point + _accumulated;
-    }
+    inline timespec_t raw_elapsed() const { return timespec_t::now() - _initial_time_point + _accumulated; }
 
     /// @brief The starting time point of the Timer.
     timespec_t _initial_time_point;

@@ -16,17 +16,18 @@ namespace timelib
 {
 
 /// @brief A class that represents a stopwatch for benchmarking.
-class Stopwatch {
+class Stopwatch
+{
 public:
     /// @brief Constructs a Stopwatch object.
     /// @param print_mode The mode for printing durations (default is human-readable).
     /// @param format The format to be used for printing (default is an empty string).
     Stopwatch(print_mode_t print_mode = human, const std::string &format = std::string())
-        : _last_time_point(timespec_t::now()),
-          _total_duration(Duration::zero(), print_mode, format),
-          _partials(),
-          _print_mode(print_mode),
-          _format(format)
+        : _last_time_point(timespec_t::now())
+        , _total_duration(Duration::zero(), print_mode, format)
+        , _partials()
+        , _print_mode(print_mode)
+        , _format(format)
     {
         // Nothing to do.
     }
@@ -65,10 +66,7 @@ public:
     }
 
     /// @brief Starts or resumes the Stopwatch from the current time.
-    inline void start()
-    {
-        _last_time_point = timespec_t::now();
-    }
+    inline void start() { _last_time_point = timespec_t::now(); }
 
     /// @brief Records a round, calculates the time since the last round, and updates the total duration.
     /// @return The Duration of the last round.
@@ -95,24 +93,15 @@ public:
 
     /// @brief Returns the total elapsed time since the Stopwatch was started.
     /// @return The total Duration.
-    Duration total() const
-    {
-        return _total_duration;
-    }
+    Duration total() const { return _total_duration; }
 
     /// @brief Calculates the average duration of all recorded rounds.
     /// @return The mean Duration of the rounds.
-    Duration mean() const
-    {
-        return _total_duration / static_cast<double>(_partials.size());
-    }
+    Duration mean() const { return _total_duration / static_cast<double>(_partials.size()); }
 
     /// @brief Returns all the partial durations (rounds) recorded by the Stopwatch.
     /// @return A vector of Duration representing each round.
-    inline std::vector<Duration> partials() const
-    {
-        return _partials;
-    }
+    inline std::vector<Duration> partials() const { return _partials; }
 
     /// @brief Converts the Stopwatch's total duration to a string.
     /// @return A string representation of the total duration.

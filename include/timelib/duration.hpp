@@ -10,8 +10,8 @@
 
 #include "timelib/timespec.hpp"
 
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 #include <string>
 
 namespace timelib
@@ -26,61 +26,44 @@ typedef enum {
 } print_mode_t;
 
 /// @brief A class that represents a duration of time.
-class Duration {
+class Duration
+{
 public:
-    /// @brief Constructs a Duration object. 
+    /// @brief Constructs a Duration object.
     /// @param duration the initial amount for the duration.
     /// @param print_mode the way the duration should be printed.
     /// @param format the format to be used for printing.
     Duration(timespec_t duration, print_mode_t print_mode, const std::string &format)
-        : _duration(duration),
-          _print_mode(print_mode),
-          _format(format)
+        : _duration(duration)
+        , _print_mode(print_mode)
+        , _format(format)
     {
         // Nothing to do.
     }
 
     /// @brief Returns a zero duration.
     /// @return A zero duration value.
-    static inline timespec_t zero()
-    {
-        return timespec_t::zero();
-    }
+    static inline timespec_t zero() { return timespec_t::zero(); }
 
     /// @brief Returns the internal duration as a timespec_t.
     /// @return The timespec_t object representing the raw duration.
-    inline timespec_t raw() const
-    {
-        return _duration;
-    }
+    inline timespec_t raw() const { return _duration; }
 
     /// @brief Returns the duration count.
     /// @return The duration as a double value.
-    inline double count() const
-    {
-        return _duration.count();
-    }
+    inline double count() const { return _duration.count(); }
 
     /// @brief Operator to get the duration count.
     /// @return The duration as a double value.
-    inline double operator()() const
-    {
-        return _duration.count();
-    }
+    inline double operator()() const { return _duration.count(); }
 
     /// @brief Sets the print mode.
     /// @param print_mode The new print mode to set.
-    inline void set_print_mode(print_mode_t print_mode)
-    {
-        _print_mode = print_mode;
-    }
+    inline void set_print_mode(print_mode_t print_mode) { _print_mode = print_mode; }
 
     /// @brief Sets the format for printing the duration.
     /// @param format The format string to set.
-    inline void set_format(const std::string &format)
-    {
-        _format = format;
-    }
+    inline void set_format(const std::string &format) { _format = format; }
 
     /// @brief Adds two Duration objects.
     /// @param rhs The right-hand side Duration to add.
@@ -312,10 +295,7 @@ public:
     /// @param lhs The output stream.
     /// @param rhs The Duration to print.
     /// @return The modified output stream.
-    friend std::ostream &operator<<(std::ostream &lhs, const Duration &rhs)
-    {
-        return (lhs << rhs.to_string());
-    }
+    friend std::ostream &operator<<(std::ostream &lhs, const Duration &rhs) { return (lhs << rhs.to_string()); }
 
 private:
     /// @brief Replaces all occurrences of a substring in a string.
@@ -324,7 +304,8 @@ private:
     /// @param substitute The string to replace it with.
     /// @param occurences The number of occurrences to replace (-1 for all).
     /// @return A reference to the modified string.
-    static inline std::string &replace(std::string &s, const std::string &substring, const std::string &substitute, int occurences = -1)
+    static inline std::string &
+    replace(std::string &s, const std::string &substring, const std::string &substitute, int occurences = -1)
     {
         // Find the first occurence.
         std::string::size_type pos = s.find(substring);
