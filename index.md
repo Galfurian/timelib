@@ -4,7 +4,7 @@ layout: default
 
 # TimeLib
 
-## Timekeeping library
+## Overview
 
 [![Ubuntu](https://github.com/Galfurian/timelib/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/Galfurian/timelib/actions/workflows/ubuntu.yml)
 [![Windows](https://github.com/Galfurian/timelib/actions/workflows/windows.yml/badge.svg)](https://github.com/Galfurian/timelib/actions/workflows/windows.yml)
