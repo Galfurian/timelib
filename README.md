@@ -35,8 +35,9 @@ To use `timelib`, include the source files in your project and ensure you link a
 
 ```bash
 git clone https://github.com/Galfurian/timelib.git
-# Include the "timelib" directory in your project's include path.
 ```
+
+Include the "timelib" directory in your project's include path.
 
 ---
 
