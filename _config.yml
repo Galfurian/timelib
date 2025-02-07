@@ -1,5 +1,5 @@
-title: CMDLP
-description: A c++ command-line parsing library
+title: TIMELIB
+description: A lightweight C++ library designed for time measurement and benchmarking.
 author: Enrico Fraccaroli
 show_downloads: false
 google_analytics:
